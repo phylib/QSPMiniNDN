@@ -191,7 +191,7 @@ function infoedit {
 }
 
 function minindn {
-    $install libigraph0-dev
+    $install libigraph0-dev tshark
     sudo pip install -r requirements.txt
 
     if [[ updated != true ]]; then
