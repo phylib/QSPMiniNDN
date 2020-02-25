@@ -153,13 +153,18 @@ class IPRoutingHelper(object):
         shortest_paths.sort(key=lambda x: len(x), reverse=True)
         for path in shortest_paths:
             # Check if the beginning of the path already exist
-            starting_subpaths = [path[0:i] for i in range(3, len(path))]
+
+            starting_subpaths = []
+            for i in range(3, len(path)):
+                for j in range(0, len(path) - i + 1):
+                    starting_subpaths.append(path[j: j+i])
             starting_subpaths.reverse()
+
             for starting_subpath in starting_subpaths:
                 if (starting_subpath[0], starting_subpath[-1]) in existing_paths:
                     # if the beginnin of the path exist, do not create a new one
                     existing = existing_paths[(starting_subpath[0], starting_subpath[-1])]
-                    path = existing[:] + path[len(existing) : ]
+                    path = path[:path.index(existing[0])] + existing[:] + path[path.index(existing[-1]) + 1:]
                     break
             # Create all subpaths of lengths 2 to len
             subpaths = IPRoutingHelper.calculateAllSubPaths(path)
