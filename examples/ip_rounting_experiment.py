@@ -24,6 +24,7 @@
 from mininet.log import setLogLevel, info
 
 from minindn.minindn import Minindn
+from minindn.util import MiniNDNCLI
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.apps.nlsr import Nlsr
@@ -38,11 +39,6 @@ if __name__ == '__main__':
     ndn = Minindn()
 
     ndn.start()
-
-    info('Starting NFD on nodes\n')
-    nfds = AppManager(ndn, ndn.net.hosts, Nfd)
-    info('Starting NLSR on nodes\n')
-    nlsrs = AppManager(ndn, ndn.net.hosts, Nlsr)
 
     # Calculate all routes for IP routing
     IPRoutingHelper.calcAllRoutes(ndn.net)
