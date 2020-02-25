@@ -22,7 +22,7 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 from igraph import Graph
-from mininet.log import info
+from mininet.log import info, debug
 
 
 class LinkInfo(object):
@@ -99,11 +99,6 @@ class IPRoutingHelper(object):
         mini_nodes = net.hosts
         mini_links = net.links
 
-        # for node in mini_nodes:
-        #     print("[" + node.name + "]")
-        #     for intf in node.intfs:
-        #         print(node.intfs[intf].ip)
-
         # Enabling IP forwaring on all nodes
         info('Configure IP forwarding on all nodes\n')
         for node in mini_nodes:
@@ -126,8 +121,8 @@ class IPRoutingHelper(object):
         named_paths = []
         existing_paths = {}
         shortest_paths = []
-        #from_node = "no"
-        #to_node = "lt"
+        # from_node = "no"
+        # to_node = "lt"
         for from_node in node_names:
             for to_node in node_names:
                 if from_node != to_node:
@@ -136,14 +131,8 @@ class IPRoutingHelper(object):
                     paths = networkGraph.get_all_shortest_paths(from_node, to_node)
                     if len(paths) == 0:
                         continue
-                    # for p in paths:
-                    #     print([networkGraph.vs['name'][n] for n in p])
-                    # print("----")
                     paths.sort(key=lambda x: str(x))
                     paths.sort(key=lambda x: len(x))
-                    # for p in paths:
-                    #     print([networkGraph.vs['name'][n] for n in p])
-                    # print("----")
                     shortest_path = paths[0]
                     shortest_path_with_nodenames = []
                     for node in shortest_path:
@@ -157,7 +146,7 @@ class IPRoutingHelper(object):
             starting_subpaths = []
             for i in range(3, len(path)):
                 for j in range(0, len(path) - i + 1):
-                    starting_subpaths.append(path[j: j+i])
+                    starting_subpaths.append(path[j: j + i])
             starting_subpaths.reverse()
 
             for starting_subpath in starting_subpaths:
@@ -176,7 +165,6 @@ class IPRoutingHelper(object):
         # Iterate over all paths and configure the routes using the 'route add'
         info('Configure routes on all nodes\n')
         for path in named_paths:
-            print(path)
             start_node = path[0]
             end_node = path[-1]
             mini_start = net.get(start_node)
@@ -189,12 +177,12 @@ class IPRoutingHelper(object):
                 addr = mini_end.intfs[intf].ip
                 if len(path) == 2:
                     # For direct connection, configure exit interface
-                    # info('[{}] route add -host {} dev {}\n'.format(start_node, addr, start_intf))
+                    debug('[{}] route add -host {} dev {}\n'.format(start_node, addr, start_intf))
                     mini_start.cmd('route add -host {} dev {}'.format(addr, start_intf))
                 elif len(path) > 2:
                     # For longer paths, configure next hop as gateway
                     gateway_ip = link_info.end_ip
-                    # info('[{}] route add -host {} dev {} gw {}\n'
-                    #     .format(start_node, addr, start_intf, gateway_ip))
+                    debug('[{}] route add -host {} dev {} gw {}\n'
+                          .format(start_node, addr, start_intf, gateway_ip))
                     mini_start.cmd('route add -host {} dev {} gw {}'
                                    .format(addr, start_intf, gateway_ip))
