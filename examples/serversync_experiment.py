@@ -25,6 +25,7 @@ import argparse
 import sys
 import random
 import time
+from tqdm import tqdm
 
 from mininet.log import setLogLevel, info
 from mininet.topo import Topo
@@ -110,7 +111,9 @@ if __name__ == '__main__':
                    traceFile="/home/phmoll/Coding/SyncProtocols/QuadTreeRMAComparison/max_distance/ChunkChanges-very-distributed.csv")
 
     # Sleep until the end of the evaluation + a bit more
-    time.sleep(660)
+    info("Waiting for evaluation to end\n")
+    for i in tqdm(range(0, 66)):
+        time.sleep(10)
 
     # MiniNDNCLI(ndn.net)
     ndn.stop()
