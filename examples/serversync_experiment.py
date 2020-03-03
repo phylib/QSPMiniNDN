@@ -34,6 +34,7 @@ from minindn.minindn import Minindn
 from minindn.util import MiniNDNCLI
 from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
+from minindn.apps.tshark import Tshark
 from minindn.helpers.ndn_routing_helper import NdnRoutingHelper
 
 from math import sqrt, log
@@ -55,20 +56,26 @@ if __name__ == '__main__':
     parser.add_argument('--random-seed', dest='randomSeed', default=0)
     parser.add_argument('--chunk-threshold', dest='chunkThreshold', type=int, default=200)
     parser.add_argument('--level-difference', dest='levelDifference', default=2)
+    parser.add_argument('--console', dest='console', default=False, type=bool)
 
     ####### Start all the NDN Stuff #######
     ndn = Minindn(parser=parser)
     ndn.start()
-    info('Starting NFD on nodes\n')
-    nfds = AppManager(ndn, ndn.net.hosts, Nfd)
 
-    ####### Here, the real magic is starting #######
     numServers = ndn.args.numServers
     logDir = ndn.args.logDir
     treeSize = ndn.args.treeSize
     prefix = ndn.args.prefix
     randomSeed = ndn.args.randomSeed
     random.seed(randomSeed)
+
+    info('Start PCAP logging on nodes\n')
+    AppManager(ndn, ndn.net.hosts, Tshark, logFolder=logDir, singleLogFile=True)
+
+    info('Starting NFD on nodes\n')
+    nfds = AppManager(ndn, ndn.net.hosts, Nfd)
+
+    ####### Here, the real magic is starting #######
 
     # Calculate regions of the servers
     requestLevel = int(log(sqrt(numServers), 2))
@@ -100,7 +107,7 @@ if __name__ == '__main__':
     # For all host, pass ndn.net.hosts or a list, [ndn.net['a'], ..] or [ndn.net.hosts[0],.]
     for server in servers:
         grh.addOrigin([server[0]], [server[5]])
-    grh.calculateNPossibleRoutes()
+    grh.calculateNPossibleRoutes(nFaces=1)
 
     # Start all game server apps
     for server in servers:
@@ -112,8 +119,10 @@ if __name__ == '__main__':
 
     # Sleep until the end of the evaluation + a bit more
     info("Waiting for evaluation to end\n")
-    for i in tqdm(range(0, 66)):
-        time.sleep(10)
+    if ndn.args.console:
+        MiniNDNCLI(ndn.net)
+    else:
+        for i in tqdm(range(0, 66), desc="Evaluation Progress"):
+            time.sleep(10)
 
-    # MiniNDNCLI(ndn.net)
     ndn.stop()
