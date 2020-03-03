@@ -57,6 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('--chunk-threshold', dest='chunkThreshold', type=int, default=200)
     parser.add_argument('--level-difference', dest='levelDifference', default=2)
     parser.add_argument('--console', dest='console', default=False, type=bool)
+    parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
 
     ####### Start all the NDN Stuff #######
     ndn = Minindn(parser=parser)
@@ -68,6 +69,7 @@ if __name__ == '__main__':
     prefix = ndn.args.prefix
     randomSeed = ndn.args.randomSeed
     random.seed(randomSeed)
+    serverCluster = ndn.args.serverCluster
 
     info('Start PCAP logging on nodes\n')
     AppManager(ndn, ndn.net.hosts, Tshark, logFolder=logDir, singleLogFile=True)
@@ -82,7 +84,12 @@ if __name__ == '__main__':
     regionSize = treeSize / 2 ** requestLevel
     servers = []
     for i in range(0, numServers):
-        host = ndn.net.hosts[random.randint(0, len(ndn.net.hosts) - 1)]
+        host = None
+        if serverCluster:
+            host = ndn.net.getNodeByName("s" + str(i))
+        else:
+            host = ndn.net.hosts[random.randint(0, len(ndn.net.hosts) - 1)]
+
         x_index = int(i / sqrt(numServers))
         y_index = int(i % sqrt(numServers))
         x = x_index * regionSize
