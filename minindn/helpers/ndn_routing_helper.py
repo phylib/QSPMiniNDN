@@ -32,6 +32,7 @@ from math import sin, cos, sinh, cosh, acos, acosh
 import json
 import operator
 from collections import defaultdict
+from tqdm import tqdm
 
 from mininet.log import info, debug, error, warn
 from minindn.helpers.nfdc import Nfdc as nfdc
@@ -290,7 +291,7 @@ class NdnRoutingHelper(object):
         self.routeObject = _CalculateRoutes(self.net, self.routingType)
 
     def globalRoutingHelperHandler(self):
-        for host in self.net.hosts:
+        for host in tqdm(self.net.hosts, desc="Install routes on nodes"):
             neighborIPs = self.getNeighbor(host)
             self.createFaces(host, neighborIPs)
             self.routeAdd(host, neighborIPs)
@@ -305,9 +306,11 @@ class NdnRoutingHelper(object):
         :param Nodes nodes: List of nodes from net object
         """
         for node in nodes:
-            self.namePrefixes[node.name] = prefix
+            if not node.name in self.namePrefixes:
+                self.namePrefixes[node.name] = []
+            self.namePrefixes[node.name] += prefix
 
-    def calculateNPossibleRoutes(self, nFaces=0):
+    def calculateNPossibleRoutes(self, nFaces=1):
         """
         By default, calculates all possible routes i.e. routes via all the faces of a node.
         pass nFaces if want to compute routes via n number of faces. e.g. 2. For larger topology
@@ -339,8 +342,13 @@ class NdnRoutingHelper(object):
         :param IP neighborIPs: IP addresses of neighbors
         """
         neighbors = self.routes[node.name]
+        neighbors.sort(key=lambda x : x[1])
+        installed_routes = set()
         for route in neighbors:
             destination = route[0]
+            if destination in installed_routes:
+                continue
+            installed_routes.add(destination)
             cost = int(route[1])
             nextHop = route[2]
             defaultPrefix = "/ndn/{}-site/{}".format(destination, destination)
