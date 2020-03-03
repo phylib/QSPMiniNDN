@@ -1,6 +1,6 @@
 # -*- Mode:python; c-file-style:"gnu"; indent-tabs-mode:nil -*- */
 #
-# Copyright (C) 2015-2019, The University of Memphis,
+# Copyright (C) 2015-2020, The University of Memphis,
 #                          Arizona Board of Regents,
 #                          Regents of the University of California.
 #
@@ -26,19 +26,36 @@ from mininet.log import debug
 
 
 class Tshark(Application):
+    """
+    Logging utility to dump network traffic of a node to a PCAP file.
 
-    def __init__(self, node, logLevel='NONE', logFolder="./"):
+    The app is based on the command line tool tshark and requires tshark to be installed on the system.
+    """
+
+    def __init__(self, node, logLevel='NONE', logFolder="./", singleLogFile=False):
+        """
+        :param logFolder Folder, where PCAP files are stored.
+        :param singleLogFile Single PCAP file per node, or individual PCAP for each interface
+        """
+
         Application.__init__(self, node)
 
         self.logLevel = node.params['params'].get('nfd-log-level', logLevel)
         self.logFolder = logFolder
+        self.singleLogFile = singleLogFile
 
-        # create logfolder folder
+        # Create logfile folder in case it does not exist
         node.cmd('mkdir -p {}'.format(self.logFolder))
 
     def start(self):
         # Start capturing traffic with Tshark. Create one logfile for every interface
         debug("[{0}] Starting tshark logging\n".format(self.node.name))
-        for intf in self.node.intfNames():
-            ndnDumpOutputFile = "{}{}.pcap".format(self.logFolder, intf)
-            self.node.cmd("tshark -i {} -w {} &> /dev/null &".format(intf, ndnDumpOutputFile))
+
+        if self.singleLogFile:
+            interfaces = ["-i " + intf for intf in self.node.intfNames()]
+            ndnDumpOutputFile = "{}{}-interfaces.pcap".format(self.logFolder, self.node.name)
+            self.node.cmd("tshark {} -w {} &> /dev/null &".format(" ".join(interfaces), ndnDumpOutputFile))
+        else:
+            for intf in self.node.intfNames():
+                ndnDumpOutputFile = "{}{}.pcap".format(self.logFolder, intf)
+                self.node.cmd("tshark -i {} -w {} &> /dev/null &".format(intf, ndnDumpOutputFile))

@@ -21,7 +21,7 @@
 # along with Mini-NDN, e.g., in COPYING.md file.
 # If not, see <http://www.gnu.org/licenses/>.
 
-from mininet.log import debug
+from mininet.log import debug, info
 from minindn.minindn import Minindn
 
 SLEEP_TIME = 0.2
@@ -49,7 +49,10 @@ class Nfdc(object):
             'expires {}'.format(expirationInMillis) if expirationInMillis else ''
         )
 
-        debug(node.cmd(cmd))
+        cmd_response = node.cmd(cmd)
+        if "route-add-accepted" not in cmd_response:
+            info("route-add not accepted: " + cmd)
+        debug(cmd_response)
         Minindn.sleep(SLEEP_TIME)
 
     @staticmethod

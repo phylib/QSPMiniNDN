@@ -27,6 +27,8 @@ import time
 import os
 import configparser
 from subprocess import call, check_output
+import shutil
+import glob
 
 from mininet.topo import Topo
 from mininet.net import Mininet
@@ -34,6 +36,7 @@ from mininet.link import TCLink
 from mininet.node import Switch
 from mininet.util import ipStr, ipParse
 from mininet.log import info, error
+
 
 class Minindn(object):
     """ This class provides the following features to the user:
@@ -95,7 +98,7 @@ class Minindn(object):
         try:
             Minindn.ndnSecurityDisabled = '/dummy/KEY/-%9C%28r%B8%AA%3B%60' in \
                                           check_output('ndnsec-get-default -k'.split()). \
-                                          decode('utf-8').split('\n')
+                                              decode('utf-8').split('\n')
             info('Dummy key chain patch is installed in ndn-cxx. Security will be disabled.\n')
         except:
             pass
@@ -187,6 +190,11 @@ class Minindn(object):
         for cleanup in self.cleanups:
             cleanup()
         self.net.stop()
+        if self.resultDir is not None:
+            info("Moving results to {}\n".format(self.resultDir))
+            os.system("mkdir -p {}".format(self.resultDir))
+            for file in glob.glob('{}/*'.format(self.workDir)):
+                shutil.move(file, self.resultDir)
 
     @staticmethod
     def cleanUp():

@@ -50,4 +50,4 @@ if __name__ == '__main__':
 
     MiniNDNCLI(ndn.net)
 
-    ndn.net.stop()
+    ndn.stop()
