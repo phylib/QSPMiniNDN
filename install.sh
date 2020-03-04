@@ -345,6 +345,41 @@ function usage {
     exit 2
 }
 
+function quadTreeSync {
+  # Install Catch2
+  mkdir -p dependencies
+  pushd dependencies
+
+  git clone https://github.com/catchorg/Catch2.git
+  pushd Catch2
+  cmake -Bbuild -H. -DBUILD_TESTING=OFF
+  sudo cmake --build build/ --target install
+  popd
+
+  # Install spdlog
+  git clone https://github.com/gabime/spdlog.git
+  pushd spdlog
+  mkdir build
+  pushd build
+  cmake ..
+  make -j
+  sudo make install
+  popd
+  popd
+
+  sudo ldconfig
+
+  $install cmake
+
+  popd
+
+  git clone https://gitlab.itec.aau.at/philipp-moll/QuadTreeSyncEvaluation.git
+  pushd QuadTreeSyncEvaluation
+  cmake .
+  make -j
+  popd
+}
+
 if [[ $# -eq 0 ]]; then
     usage
 else
@@ -368,5 +403,6 @@ else
         ?)    usage;;
         esac
     done
+    quadTreeSync
     shift $(($OPTIND - 1))
 fi
