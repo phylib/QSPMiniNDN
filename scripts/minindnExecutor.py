@@ -2,7 +2,7 @@ import os
 import argparse
 
 
-def execute(result_dir="/vagrant/results/"):
+def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
     num_servers = [
         4,
         16
@@ -80,8 +80,10 @@ def execute(result_dir="/vagrant/results/"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Execute multiple MiniNDN Evaluations.')
     parser.add_argument('--result-dir', dest='resultDir', default="/tmp/")
+    parser.add_argument('--src-dir', dest='srcDir', default="./QuadTreeSyncEvaluation/")
 
     args = parser.parse_args()
     resultDir = args.resultDir
+    srcDir = args.srcDir
 
-    execute(result_dir=resultDir)
+    execute(result_dir=resultDir, srcDir=srcDir)
