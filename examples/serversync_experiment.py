@@ -58,6 +58,8 @@ if __name__ == '__main__':
     parser.add_argument('--level-difference', dest='levelDifference', default=2)
     parser.add_argument('--console', dest='console', default=False, type=bool)
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
+    parser.add_argument('--protocol', dest='protocol', default="QuadTree", choices=["QuadTree", "StateVector", "ZMQ"])
+    parser.add_argument('--trace-file', dest='traceFile', default="./traceFiles/ChunkChanges-very-distributed.csv")
 
     ####### Start all the NDN Stuff #######
     ndn = Minindn(parser=parser)
@@ -70,6 +72,8 @@ if __name__ == '__main__':
     randomSeed = ndn.args.randomSeed
     random.seed(randomSeed)
     serverCluster = ndn.args.serverCluster
+    protocol = ndn.args.protocol
+    traceFile = ndn.args.traceFile
 
     info('Start PCAP logging on nodes\n')
     AppManager(ndn, ndn.net.hosts, Tshark, logFolder=logDir, singleLogFile=True)
@@ -122,7 +126,7 @@ if __name__ == '__main__':
                    requestLevel=requestLevel,
                    treeSize=treeSize,
                    chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
-                   traceFile="/home/phmoll/Coding/SyncProtocols/QuadTreeRMAComparison/max_distance/ChunkChanges-very-distributed.csv")
+                   traceFile=traceFile)
 
     # Sleep until the end of the evaluation + a bit more
     info("Waiting for evaluation to end\n")
