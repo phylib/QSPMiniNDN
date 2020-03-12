@@ -80,10 +80,12 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Execute multiple MiniNDN Evaluations.')
     parser.add_argument('--result-dir', dest='resultDir', default="/tmp/")
-    parser.add_argument('--src-dir', dest='srcDir', default="./QuadTreeSyncEvaluation/")
+    parser.add_argument('--src-dir', dest='srcDir', default=None)
 
     args = parser.parse_args()
     resultDir = args.resultDir
     srcDir = args.srcDir
+    if srcDir is None:
+        srcDir = os.getcwd() + "/QuadTreeSyncEvaluation/"
 
     execute(result_dir=resultDir, srcDir=srcDir)
