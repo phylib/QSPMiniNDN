@@ -24,10 +24,11 @@
 import argparse
 import sys
 import random
+import os
 import time
 from tqdm import tqdm
 
-from mininet.log import setLogLevel, info
+from mininet.log import setLogLevel, info, error
 from mininet.topo import Topo
 
 from minindn.minindn import Minindn
@@ -36,10 +37,18 @@ from minindn.apps.app_manager import AppManager
 from minindn.apps.nfd import Nfd
 from minindn.apps.tshark import Tshark
 from minindn.helpers.ndn_routing_helper import NdnRoutingHelper
+from minindn.helpers.ip_routing_helper import IPRoutingHelper
+from minindn.apps.QuadTreeGameServer import QuadTreeGameServer
+from minindn.apps.SVSGameServer import SVSGameServer
 
 from math import sqrt, log
 
-from minindn.apps.gameServer import GameServer
+
+def dump_params(args):
+    os.system("mkdir -p {}".format(args.workDir))
+    with open(args.workDir + "/params_dump.txt", "w") as file:
+        file.write(str(args))
+
 
 if __name__ == '__main__':
     setLogLevel('info')
@@ -59,7 +68,7 @@ if __name__ == '__main__':
     parser.add_argument('--console', dest='console', default=False, type=bool)
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
     parser.add_argument('--protocol', dest='protocol', default="QuadTree", choices=["QuadTree", "StateVector", "ZMQ"])
-    parser.add_argument('--trace-file', dest='traceFile', default="./traceFiles/ChunkChanges-very-distributed.csv")
+    parser.add_argument('--trace-file', dest='traceFile', default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
     parser.add_argument('--src-dir', dest='srcDir', default="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/")
 
     ####### Start all the NDN Stuff #######
@@ -77,11 +86,18 @@ if __name__ == '__main__':
     traceFile = ndn.args.traceFile
     srcDir = ndn.args.srcDir
 
+    dump_params(ndn.args)
+
+    is_ndn_eval = True if (protocol is not "ZMQ") else False
+    is_ip_eval = not is_ndn_eval
+
     info('Start PCAP logging on nodes\n')
     AppManager(ndn, ndn.net.hosts, Tshark, logFolder=logDir, singleLogFile=True)
 
-    info('Starting NFD on nodes\n')
-    nfds = AppManager(ndn, ndn.net.hosts, Nfd)
+    ################### Start NFDs ###################
+    if is_ndn_eval:  # NFD is only required in NDN evaluations
+        info('Starting NFD on nodes\n')
+        nfds = AppManager(ndn, ndn.net.hosts, Nfd)
 
     ####### Here, the real magic is starting #######
 
@@ -115,21 +131,43 @@ if __name__ == '__main__':
         print((host, x_index, y_index, x, y, str_name))
         servers.append((host, x_index, y_index, x, y, str_name, responsibility, i))
 
-    info('Adding static routes to NFD\n')
-    grh = NdnRoutingHelper(ndn.net)
-    # For all host, pass ndn.net.hosts or a list, [ndn.net['a'], ..] or [ndn.net.hosts[0],.]
-    for server in servers:
-        grh.addOrigin([server[0]], [server[5]])
-    grh.calculateNPossibleRoutes(nFaces=1)
+    ################### NDN Routing ###################
+    if is_ndn_eval:  # NDN routing is only needed in NDN scenarios
+        info('Adding static routes to NFD\n')
+        grh = NdnRoutingHelper(ndn.net)
+        # For all host, pass ndn.net.hosts or a list, [ndn.net['a'], ..] or [ndn.net.hosts[0],.]
+        for server in servers:
+            if protocol == 'QuadTree':
+                grh.addOrigin([server[0]], [server[5]])
+            elif protocol == 'StateVector':
+                # Todo: Do Statevector stuff
+                # Default FW strategy needs to be multicast
+                # Register requrired prefixes
+                pass
+        grh.calculateNPossibleRoutes(nFaces=1)
+    ################### IP Routing ###################
+    if is_ip_eval:
+        info("Adding IP routes")
+        IPRoutingHelper.calcAllRoutes(ndn.net)
 
+    ################### Start game servers ###################
     # Start all game server apps
     for server in servers:
-        AppManager(ndn, [server[0]], GameServer, responsibility=server[6], logFolder=logDir, prefix=prefix,
-                   requestLevel=requestLevel,
-                   treeSize=treeSize,
-                   chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
-                   traceFile=traceFile, srcDir=srcDir)
+        if protocol == "QuadTree":
+            AppManager(ndn, [server[0]], QuadTreeGameServer, responsibility=server[6], logFolder=logDir, prefix=prefix,
+                       requestLevel=requestLevel,
+                       treeSize=treeSize,
+                       chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
+                       traceFile=traceFile, srcDir=srcDir)
+        elif protocol == "StateVector":
+            AppManager(ndn, [server[0]], SVSGameServer, responsibility=server[6], logFolder=logDir,
+                       treeSize=treeSize, clientId=server[7],
+                       traceFile=traceFile, srcDir=srcDir)
+        elif protocol == "ZMQ":
+            error("ZMQ client app not available")
+            pass
 
+    ################### Do the evaluation ###################
     # Sleep until the end of the evaluation + a bit more
     info("Waiting for evaluation to end\n")
     if ndn.args.console:

@@ -2,7 +2,7 @@ from minindn.apps.application import Application
 from mininet.log import info
 
 
-class GameServer(Application):
+class QuadTreeGameServer(Application):
 
     def __init__(self, node, responsibility, logLevel='NONE', logFolder="./logs/", treeSize=65536,
                  traceFile="trace.csv", requestLevel=1, prefix="/world", chunkThreshold=200, levelDifference=2,
@@ -26,7 +26,7 @@ class GameServer(Application):
 
     def start(self):
         # Start capturing traffic with Tshark
-        info("[{0}] Start GameServer\n".format(self.node.name))
+        info("[{0}] Start QuadTreeGameServer\n".format(self.node.name))
         self.node.cmd("{8}/EvaluationSyncClient"
                       " --responsiblityArea {0}"
                       " --logDir {1}"
