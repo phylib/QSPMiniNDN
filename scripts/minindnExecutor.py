@@ -22,7 +22,7 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
     ]
 
     types = [
-        "continent",
+        # "continent",
         "cluster"
     ]
     traceFiles = [
@@ -51,7 +51,7 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                             serverClusterConfig = "--server-cluster True "
 
                         cmd = "sudo python examples/serversync_experiment.py {} --num-servers={} --protocol={} {} " \
-                              "--result-dir {} --random-seed {} --trace-file {}/traceFiles/{}".format(
+                              "--result-dir {} --random-seed {} --trace-file {}/traceFiles/{} --src-dir {}".format(
                             topology,
                             servers,
                             protocol,
@@ -59,7 +59,8 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                             results_folder,
                             run,
                             os.getcwd(),
-                            traceFile
+                            traceFile,
+                            srcDir
                         )
                         print(cmd)
                         os.system(cmd)

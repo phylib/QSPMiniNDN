@@ -113,7 +113,7 @@ if __name__ == '__main__':
             name.append(qIndex)
         str_name = prefix + "/" + "/".join(str(x) for x in name)
         print((host, x_index, y_index, x, y, str_name))
-        servers.append((host, x_index, y_index, x, y, str_name, responsibility))
+        servers.append((host, x_index, y_index, x, y, str_name, responsibility, i))
 
     info('Adding static routes to NFD\n')
     grh = NdnRoutingHelper(ndn.net)
