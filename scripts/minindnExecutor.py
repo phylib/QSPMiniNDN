@@ -44,6 +44,11 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                             servers) + "_" + type + "_" + protocol + "_run" + str(run) + "_" + traceFile.replace('.',
                                                                                                                  '')
 
+                        # Check if the results_folder already exists and do not do evaluation in this case
+                        if os.path.isdir(results_folder):
+                            print("### Skipping evaluation run, result folder {} already exists ###".format(results_folder))
+                            continue
+
                         topology = "topologies/geant.conf"
                         serverClusterConfig = ""
                         if type == "cluster":
