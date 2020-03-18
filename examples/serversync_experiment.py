@@ -38,6 +38,7 @@ from minindn.apps.nfd import Nfd
 from minindn.apps.tshark import Tshark
 from minindn.helpers.ndn_routing_helper import NdnRoutingHelper
 from minindn.helpers.ip_routing_helper import IPRoutingHelper
+from minindn.helpers.nfdc import Nfdc
 from minindn.apps.QuadTreeGameServer import QuadTreeGameServer
 from minindn.apps.SVSGameServer import SVSGameServer
 
@@ -140,11 +141,17 @@ if __name__ == '__main__':
             if protocol == 'QuadTree':
                 grh.addOrigin([server[0]], [server[5]])
             elif protocol == 'StateVector':
-                # Todo: Do Statevector stuff
-                # Default FW strategy needs to be multicast
                 # Register requrired prefixes
-                pass
+                grh.addOrigin([server[0]], "/ndn/svs/syncNotify")
+                grh.addOrigin([server[0]], "/ndn/svs/vsyncData")
         grh.calculateNPossibleRoutes(nFaces=1)
+
+        if protocol == 'StateVector':
+            # State vector requires multicast as FW Strategy
+            # nfdc strategy set / /localhost/nfd/strategy/multicast/%FD%03
+            for host in ndn.net.hosts:
+                Nfdc.setStrategy(host, "/", Nfdc.STRATEGY_MULTICAST)
+
     ################### IP Routing ###################
     if is_ip_eval:
         info("Adding IP routes")
