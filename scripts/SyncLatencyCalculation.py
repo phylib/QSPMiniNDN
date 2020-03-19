@@ -70,6 +70,37 @@ def do_calculation(resultDir):
         folderName = resultDir.split("/")[-2]
     syncLatencies.to_csv(resultDir + "/" + folderName + '.csv', sep="\t", index=False)
 
+    # Calculate average latency for transferring chunk changes
+    servers = [log[0] for log in logs]
+    updates_received = {server: 0 for server in servers}
+    updates_missing = {server: 0 for server in servers}
+    updates_latencies = {server: 0 for server in servers}
+
+    for index, row in tqdm(syncLatencies.iterrows(), total=len(syncLatencies), desc="Calculating sync latencies"):
+        producer = row["producer"]
+        for server in servers:
+            if server == producer:
+                continue
+            if float(row["sync_latency_" + server]) > 0:
+                updates_received[server] += 1
+                updates_latencies[server] += float(row["sync_latency_" + server])
+            else:
+                updates_missing[server] += 1
+    for server in updates_latencies:
+        updates_latencies[server] = updates_latencies[server] / updates_received[server]
+    summay_cols = ['server', 'received', 'lost', 'avg_latency']
+    summary_rows = []
+    for server in servers:
+        row = {
+            'server': server,
+            'received': updates_received[server],
+            'lost': updates_missing[server],
+            'avg_latency': updates_latencies[server]
+        }
+        summary_rows.append(row)
+    summary = pd.DataFrame(summary_rows, columns=summay_cols)
+    summary.to_csv(resultDir + '/summary.csv', sep="\t", index=False)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
