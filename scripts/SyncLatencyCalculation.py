@@ -1,7 +1,7 @@
 import argparse
 import pandas as pd
 import glob
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import sys
 
 
@@ -32,7 +32,8 @@ def do_calculation(resultDir):
                 chunk_arrvied_at_server_map[server][key] = int(row['time'])
 
     rows = []
-    for chunk, (timestamp, server) in tqdm(chunk_produced_map.items(), total=len(chunk_produced_map)):
+    for chunk, (timestamp, server) in tqdm(chunk_produced_map.items(), total=len(chunk_produced_map),
+                                           desc="Calculating latencies"):
         cd = chunk.split('_')
         x = cd[0]
         y = cd[1]
