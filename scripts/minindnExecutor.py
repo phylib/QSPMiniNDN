@@ -78,7 +78,7 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                         emulation_no += 1
                         print("")
 
-    # os.system("sudo chown -R vagrant:vagrant " + result_dir)
+    os.system("sudo chown -R ubuntu:ubuntu " + result_dir)
     # os.system(
     #     "source ~/analysis/bin/activate && python3 ~/mc/mc-server-sync/statistics/trafficAnalysis/parsePCAP.py -i " + result_dir + " -o " + result_dir)
 
