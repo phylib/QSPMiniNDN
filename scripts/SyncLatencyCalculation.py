@@ -65,10 +65,10 @@ def do_calculation(resultDir):
     syncLatencies = pd.DataFrame(rows, columns=columns)
     syncLatencies = syncLatencies.sort_values('produced_at')
 
-    syncLatencies.tail(50)
-    # syncLatencies.to_csv('../logs/syncLatencies.csv', sep='\t')
-
-    syncLatencies.to_csv(resultDir + '.csv')
+    folderName = resultDir.split("/")[-1]
+    if folderName == "":
+        folderName = resultDir.split("/")[-2]
+    syncLatencies.to_csv(resultDir + "/" + folderName + '.csv', sep="\t", index=False)
 
 
 if __name__ == "__main__":
