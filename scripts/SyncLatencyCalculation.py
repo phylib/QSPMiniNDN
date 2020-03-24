@@ -9,7 +9,7 @@ def do_calculation(resultDir):
     logfiles = glob.glob(resultDir + "/**/*_chunklog.csv", recursive=True)
 
     logs = [('Server_' + x.split('/')[-1].split('_')[-2].replace('.csv', ''), x) for x in logfiles]
-    columns = ['chunk_x', 'chunk_y', 'version', 'producer', 'produced_at']
+    columns = ['chunk_x', 'chunk_y', 'version', 'producer', 'produced_at', 'update_size']
 
     chunk_produced_map = {}
     chunk_arrvied_at_server_map = {}
@@ -20,20 +20,20 @@ def do_calculation(resultDir):
     syncLatencies = pd.DataFrame(columns=columns)
 
     for (server, file) in logs:
-        log = pd.read_csv(file, sep='\t', header=None, names=["time", "type", "x", "y", "v"])
+        log = pd.read_csv(file, sep='\t', header=None, names=["time", "type", "x", "y", "v", "update_size"])
         # log = log.dropna(subset=['time'])
         print("Processing CSV file of server " + server)
 
         for index, row in tqdm(log.iterrows(), total=len(log), desc=server):
             key = sys.intern(str(row['x']) + '_' + str(row['y']) + '_' + str(row['v']))
             if row['type'] == 'OUT':
-                chunk_produced_map[key] = (int(row['time']), server)
+                chunk_produced_map[key] = (int(row['time']), server, int(row['update_size']))
             elif row['type'] == 'IN':
                 chunk_arrvied_at_server_map[server][key] = int(row['time'])
 
     rows = []
-    for chunk, (timestamp, server) in tqdm(chunk_produced_map.items(), total=len(chunk_produced_map),
-                                           desc="Calculating latencies"):
+    for chunk, (timestamp, server, update_size) in tqdm(chunk_produced_map.items(), total=len(chunk_produced_map),
+                                                        desc="Calculating latencies"):
         cd = chunk.split('_')
         x = cd[0]
         y = cd[1]
@@ -42,7 +42,8 @@ def do_calculation(resultDir):
                  'chunk_y': y,
                  'version': v,
                  'producer': server,
-                 'produced_at': timestamp}
+                 'produced_at': timestamp,
+                 'update_size': update_size}
         for (r_server, file) in logs:
             if chunk in chunk_arrvied_at_server_map[r_server]:
                 arrived_time = chunk_arrvied_at_server_map[r_server][chunk]
@@ -68,7 +69,9 @@ def do_calculation(resultDir):
     folderName = resultDir.split("/")[-1]
     if folderName == "":
         folderName = resultDir.split("/")[-2]
-    syncLatencies.to_csv(resultDir + "/" + folderName + '.csv', sep="\t", index=False)
+    csv_filename = resultDir + "/" + folderName + '.csv'
+    print("Saving syncLatencies to: " + csv_filename)
+    syncLatencies.to_csv(csv_filename, sep="\t", index=False)
 
     # Calculate average latency for transferring chunk changes
     servers = [log[0] for log in logs]
