@@ -2,3 +2,4 @@ python-igraph
 setuptools
 tqdm
 pandas
+matplotlib
