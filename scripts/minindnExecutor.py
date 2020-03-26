@@ -80,7 +80,7 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                         os.system(cmd)
 
                         # Start calculation of results as background process
-                        cmd = "sudo python scripts/SyncLatencyCalculation.py --result-dir {} &".format(results_folder)
+                        cmd = "python3 scripts/SyncLatencyCalculation.py --result-dir {} &".format(results_folder)
                         print(cmd)
                         os.system(cmd)
 
