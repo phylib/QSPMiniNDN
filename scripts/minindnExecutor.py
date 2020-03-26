@@ -75,6 +75,15 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                         print(cmd)
                         os.system(cmd)
 
+                        cmd = "sudo chown -R ubuntu:ubuntu {}".format(results_folder)
+                        print(cmd)
+                        os.system(cmd)
+
+                        # Start calculation of results as background process
+                        cmd = "sudo python scripts/SyncLatencyCalculation.py --result-dir {} &".format(results_folder)
+                        print(cmd)
+                        os.system(cmd)
+
                         emulation_no += 1
                         print("")
 
