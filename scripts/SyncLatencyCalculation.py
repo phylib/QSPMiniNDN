@@ -110,21 +110,17 @@ def do_calculation(resultDir):
         updates_received = {server: 0 for server in servers}
         updates_missing = {server: 0 for server in servers}
         updates_latencies = {server: 0 for server in servers}
-        convergence_times = []
 
         for index, row in tqdm(syncLatencies.iterrows(), total=len(syncLatencies), desc="Calculating sync latencies"):
             producer = row["producer"]
-            convergence_time = []
             for server in servers:
                 if server == producer:
                     continue
                 if float(row["sync_latency_" + server]) > 0:
                     updates_received[server] += 1
                     updates_latencies[server] += float(row["sync_latency_" + server])
-                    convergence_time.append(float(row["sync_latency_" + server]))
                 else:
                     updates_missing[server] += 1
-            convergence_times.append(max(convergence_time))
         for server in updates_latencies:
             updates_latencies[server] = updates_latencies[server] / updates_received[server]
         summay_cols = ['server', 'received', 'lost', 'avg_latency']
