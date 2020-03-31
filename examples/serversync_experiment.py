@@ -41,6 +41,7 @@ from minindn.helpers.ip_routing_helper import IPRoutingHelper
 from minindn.helpers.nfdc import Nfdc
 from minindn.apps.QuadTreeGameServer import QuadTreeGameServer
 from minindn.apps.SVSGameServer import SVSGameServer
+from minindn.apps.ZMQGameServer import ZMQGameServer
 
 from math import sqrt, log
 
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('--console', dest='console', default=False, type=bool)
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
     parser.add_argument('--protocol', dest='protocol', default="QuadTree", choices=["QuadTree", "StateVector", "ZMQ"])
-    parser.add_argument('--trace-file', dest='traceFile', default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
+    parser.add_argument('--trace-file', dest='traceFile',
+                        default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
     parser.add_argument('--src-dir', dest='srcDir', default="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/")
 
     ####### Start all the NDN Stuff #######
@@ -89,7 +91,7 @@ if __name__ == '__main__':
 
     dump_params(ndn.args)
 
-    is_ndn_eval = True if (protocol is not "ZMQ") else False
+    is_ndn_eval = True if (protocol != "ZMQ") else False
     is_ip_eval = not is_ndn_eval
 
     info('Start PCAP logging on nodes\n')
@@ -171,8 +173,9 @@ if __name__ == '__main__':
                        treeSize=treeSize, clientId=server[7],
                        traceFile=traceFile, srcDir=srcDir)
         elif protocol == "ZMQ":
-            error("ZMQ client app not available")
-            pass
+            otherPeers = [(remote[0].intfs[0].ip, 5000) for remote in servers if remote[0].name != server[0].name]
+            AppManager(ndn, [server[0]], ZMQGameServer, responsibility=server[6], logFolder=logDir,
+                       otherPeers=otherPeers, clientId=server[7], traceFile=traceFile)#, srcDir=srcDir)
 
     ################### Do the evaluation ###################
     # Sleep until the end of the evaluation + a bit more
