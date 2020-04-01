@@ -378,12 +378,21 @@ function quadTreeSync {
   cmake .
   make -j
   popd
+
+}
+
+function zmqClient {
+
+  git clone https://gitlab.itec.aau.at/minecraft/ZMQSyncPeer.git ZMQSyncPeer
+  pushd ZMQSyncPeer
+  pip3 install -r requirements.txt
+  popd
 }
 
 if [[ $# -eq 0 ]]; then
     usage
 else
-    while getopts 'acdhimnp' OPTION
+    while getopts 'acdhimnpqz' OPTION
     do
         case $OPTION in
         a)
@@ -391,6 +400,8 @@ else
         mininet
         minindn
         commonClientLibraries
+        quadTreeSync
+        zmqClient
         break
         ;;
         c)    commonClientLibraries;;
@@ -400,9 +411,10 @@ else
         m)    mininet;;
         n)    ndn;;
         p)    patchDummy;;
+        q)    quadTreeSync;;
+        z)    zmqClient;;
         ?)    usage;;
         esac
     done
-    quadTreeSync
     shift $(($OPTIND - 1))
 fi
