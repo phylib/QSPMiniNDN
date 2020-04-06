@@ -175,7 +175,7 @@ if __name__ == '__main__':
         elif protocol == "ZMQ":
             otherPeers = [(remote[0].intfs[0].ip, 5000) for remote in servers if remote[0].name != server[0].name]
             AppManager(ndn, [server[0]], ZMQGameServer, responsibility=server[6], logFolder=logDir,
-                       otherPeers=otherPeers, clientId=server[7], traceFile=traceFile)#, srcDir=srcDir)
+                       otherPeers=otherPeers, clientId=server[7], traceFile=traceFile, srcDir=srcDir + "/ZMQSyncPeer")
 
     ################### Do the evaluation ###################
     # Sleep until the end of the evaluation + a bit more
