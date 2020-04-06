@@ -33,7 +33,7 @@ class ZMQGameServer(Application):
               " --serverPort 5000" \
               " --clients {4}" \
               " --logDir {1}" \
-              " --tracefile {2} &".format(','.join(zmqRect), self.logFolder,
+              " --tracefile {2} &> {1}/app-out.log &".format(','.join(zmqRect), self.logFolder,
                                                     self.traceFile, self.srcDir, others)
         print(cmd)
         self.node.cmd(cmd)
