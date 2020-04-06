@@ -4,7 +4,7 @@ from mininet.log import info
 
 class ZMQGameServer(Application):
 
-    def __init__(self, node, responsibility, clientId, logLevel='NONE', logFolder="./logs/", otherPeers=[],
+    def __init__(self, node, responsibility, clientId, logLevel='NONE', logFolder="./logs/", otherPeers=[], serverPort=5000,
                  traceFile="trace.csv", srcDir="/home/phmoll/Coding/SyncProtocols/ZMQSyncPeer/"):
         Application.__init__(self, node)
 
@@ -14,6 +14,7 @@ class ZMQGameServer(Application):
         self.srcDir = srcDir
         self.clientId = clientId
         self.otherPeers = otherPeers
+        self.serverPort = serverPort
 
         self.responsibility = responsibility
 
@@ -35,10 +36,10 @@ class ZMQGameServer(Application):
         info("[{0}] Start ZMQGameServer\n".format(self.node.name))
         cmd = "python3 {3}/peers_seperate/peer.py" \
               " --coordinates {0}" \
-              " --serverPort 5000" \
+              " --serverPort {5}" \
               " --clients {4}" \
               " --logDir {1}" \
               " --tracefile {2} &> {1}/app-out.log &".format(','.join(zmqRect), self.logFolder,
-                                                    self.traceFile, self.srcDir, others)
+                                                    self.traceFile, self.srcDir, others, self.serverPort)
         print(cmd)
         self.node.cmd(cmd)
