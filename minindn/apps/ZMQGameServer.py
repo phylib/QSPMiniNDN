@@ -28,7 +28,7 @@ class ZMQGameServer(Application):
 
         # Start capturing traffic with Tshark
         info("[{0}] Start ZMQGameServer\n".format(self.node.name))
-        cmd = "python3 {3}/peers_seperate/peer.py" \
+        cmd = "sudo python3 {3}/peers_seperate/peer.py" \
               " --coordinates {0}" \
               " --serverPort 5000" \
               " --clients {4}" \
