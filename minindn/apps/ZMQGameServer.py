@@ -26,9 +26,14 @@ class ZMQGameServer(Application):
         rect_parts = self.responsibility.split(",")
         zmqRect = [rect_parts[0], rect_parts[3], rect_parts[2], rect_parts[1]]
 
+        info("[{0}] Enable VENV\n".format(self.node.name))
+        cmd = "source /home/ubuntu/zmqenv/bin/activate"
+        print(cmd)
+        self.node.cmd(cmd)
+
         # Start capturing traffic with Tshark
         info("[{0}] Start ZMQGameServer\n".format(self.node.name))
-        cmd = "sudo python3 {3}/peers_seperate/peer.py" \
+        cmd = "python3 {3}/peers_seperate/peer.py" \
               " --coordinates {0}" \
               " --serverPort 5000" \
               " --clients {4}" \
