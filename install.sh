@@ -385,6 +385,7 @@ function zmqClient {
 
   git clone https://gitlab.itec.aau.at/minecraft/ZMQSyncPeer.git ZMQSyncPeer
   pushd ZMQSyncPeer
+  $install python3-pip
   pip3 install -r requirements.txt
   popd
 }

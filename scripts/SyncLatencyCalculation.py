@@ -42,9 +42,22 @@ def do_calculation(resultDir):
             print("Processing CSV file of server " + server)
 
             for index, row in tqdm(log.iterrows(), total=len(log), desc=server):
-                key = sys.intern(str(row['x']) + '_' + str(row['y']) + '_' + str(row['v']))
+                # The fields time,x,y,v most be integers, otherwise the entry is not valid
+                try:
+                    _ = (int(row['x']), int(row['y']), int(row['v']), int(row['time']))
+                except ValueError:
+                    print("Row not complete:\n" + str(row))
+                    continue
+
+                key = sys.intern(str(int(row['x'])) + '_' + str(int(row['y'])) + '_' + str(int(row['v'])))
+                #if server == "Server_15":
+                #    print((key, row))
                 if row['type'] == 'OUT':
-                    chunk_produced_map[key] = (int(row['time']), server, int(row['update_size']))
+                    try:
+                        chunk_produced_map[key] = (int(row['time']), server, int(row['update_size']))
+                    except ValueError:
+                        print("Row not complete:\n" + str(row))
+                        continue
                 elif row['type'] == 'IN':
                     chunk_arrvied_at_server_map[server][key] = int(row['time'])
 
@@ -52,9 +65,9 @@ def do_calculation(resultDir):
         for chunk, (timestamp, server, update_size) in tqdm(chunk_produced_map.items(), total=len(chunk_produced_map),
                                                             desc="Calculating latencies"):
             cd = chunk.split('_')
-            x = cd[0]
-            y = cd[1]
-            v = cd[2]
+            x = int(cd[0])
+            y = int(cd[1])
+            v = int(cd[2])
             entry = {'chunk_x': x,
                      'chunk_y': y,
                      'version': v,
@@ -69,9 +82,11 @@ def do_calculation(resultDir):
                     entry["sync_latency_" + r_server] = sync_latency
                 elif server != r_server:
                     # Try to find the next higher version for the chunk
-                    for version in range(int(v), int(v) + 10):
-                        id = x + '_' + y + '_' + str(version)
+                    for version in range(v, v + 100):
+                        id = str(x) + '_' + str(y) + '_' + str(version)
                         if id in chunk_arrvied_at_server_map[r_server]:
+                            if version - v > 10:
+                                print("Version found after skipping {} entries".format(version - v))
                             arrived_time = chunk_arrvied_at_server_map[r_server][id]
                             sync_latency = arrived_time - timestamp
                             entry["arrived_at_" + r_server] = arrived_time
@@ -122,7 +137,10 @@ def do_calculation(resultDir):
                 else:
                     updates_missing[server] += 1
         for server in updates_latencies:
-            updates_latencies[server] = updates_latencies[server] / updates_received[server]
+            if updates_received[server] == 0:
+                updates_latencies[server] = float("NaN")
+            else:
+                updates_latencies[server] = updates_latencies[server] / updates_received[server]
         summay_cols = ['server', 'received', 'lost', 'avg_latency']
         summary_rows = []
         for server in servers:
