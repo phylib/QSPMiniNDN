@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 def do_calculation(resultDir):
     logfiles = glob.glob(resultDir + "/**/*_chunklog.csv", recursive=True)
-    logs = [('Server_' + x.split('/')[-1].split('_')[-2].replace('.csv', ''), x) for x in logfiles]
+    logs = [('Server_' + x.split('/')[-1].replace("__", "_").split('_')[-2].replace('.csv', ''), x) for x in logfiles]
 
     # Check if sync latencies csv already exists
     folderName = resultDir.split("/")[-1]
