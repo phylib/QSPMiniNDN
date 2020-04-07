@@ -3,7 +3,10 @@ build
 dist
 Mini_NDN.egg-info
 *.pyc
+
+# Added by Selina
 venv
+result-csv-files
 
 # Docs
 docs/html
