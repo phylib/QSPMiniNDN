@@ -103,6 +103,8 @@ def do_calculation(resultDir):
                 val = float(row["sync_latency_" + server])
                 if val >= 0.0: # Skip NaN values
                     values.append(val)
+            if len(values) == 0:
+                return float("NaN")
             return max(values)
 
         servers = [log[0] for log in logs]
