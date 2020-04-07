@@ -101,7 +101,7 @@ def do_calculation(resultDir):
             values = []
             for server in servers:
                 val = float(row["sync_latency_" + server])
-                if val > 0.0: # Skip NaN values
+                if val >= 0.0: # Skip NaN values
                     values.append(val)
             return max(values)
 
@@ -133,7 +133,7 @@ def do_calculation(resultDir):
             for server in servers:
                 if server == producer:
                     continue
-                if float(row["sync_latency_" + server]) > 0:
+                if float(row["sync_latency_" + server]) >= 0.0:
                     updates_received[server] += 1
                     updates_latencies[server] += float(row["sync_latency_" + server])
                 else:
