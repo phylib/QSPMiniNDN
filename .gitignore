@@ -3,6 +3,7 @@ build
 dist
 Mini_NDN.egg-info
 *.pyc
+venv
 
 # Docs
 docs/html
