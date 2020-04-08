@@ -42,37 +42,39 @@ class Visualizer:
 
         return [numpy.mean(sync_latencies), numpy.std(sync_latencies)]
 
+    def plotGroup(self, topology, clientConcentration):
+
+        self.fetchAllFiles(topology)
+        means = []
+        stds = []
+        for protocol in self.protocols:
+            values = self.getMeanAndStandardDeviation(protocol, clientConcentration)
+            print("Avg %s: %f" % (protocol, values[0]))
+            print("StD %s: %f" % (protocol, values[1]))
+            means.append(values[0])
+            stds.append(values[1])
+
+        self.closeAllFiles()
+
+        x_pos = numpy.arange(len(self.protocols))
+        figure, axis = plotter.subplots()
+        axis.bar(x_pos, means, yerr=stds, align="center", alpha=0.8, ecolor="black", capsize=10)
+        axis.set_ylabel("Sync Latencies")
+        axis.set_xticks(x_pos)
+        axis.set_xticklabels(self.protocols)
+        axis.set_title("Sync Latencies of two different protocols with\nhigh concentration of clients")
+        axis.yaxis.grid(True)
+
+        plotter.tight_layout()
+        plotter.show()
+
 
 
 
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.fetchAllFiles("cluster")
-
-    quadTree_values = visualizer.getMeanAndStandardDeviation("QuadTree", "concentrated")
-    print("Avg QuadTree: %f" %quadTree_values[0])
-    print("StD QuadTree: %f" % quadTree_values[1])
-    stateVector_values = visualizer.getMeanAndStandardDeviation("StateVector", "concentrated")
-    print("Avg StateVector: %f" %stateVector_values[0])
-    print("StD StateVector: %f" % stateVector_values[1])
-    visualizer.closeAllFiles()
-
-    x_pos = numpy.arange(len(visualizer.protocols))
-    means = [quadTree_values[0], stateVector_values[0]]
-    stds = [quadTree_values[1], stateVector_values[1]]
-
-    figure, axis = plotter.subplots()
-    axis.bar(x_pos, means, yerr=stds, align="center", alpha=0.5, ecolor="black", capsize=10)
-    axis.set_ylabel("Sync Latencies")
-    axis.set_xticks(x_pos)
-    axis.set_xticklabels(visualizer.protocols)
-    axis.set_title("Sync Latencies of two different protocols with\nhigh concentration of clients")
-    axis.yaxis.grid(True)
-
-    plotter.tight_layout()
-    plotter.show()
-
+    visualizer.plotGroup("continent", "very-distributed")
 
 
 
