@@ -38,7 +38,7 @@ class Visualizer:
         return numpy.mean(sync_latencies)
 
 
-    def plotGroup(self, criteria):
+    def plotGroup(self, criteria, sublabel):
         means = []
         stds = []
         for protocol in self.protocols:
@@ -58,8 +58,8 @@ class Visualizer:
         axis.set_ylabel("Sync Latencies")
         axis.set_xticks(x_pos)
         axis.set_xticklabels(self.protocols)
-        axis.set_title("Sync Latencies of two different protocols")
-        axis.set_xlabel(criteria)
+        axis.set_title("Sync Latencies of three different protocols")
+        axis.set_xlabel(sublabel)
         axis.yaxis.grid(True)
 
         plotter.tight_layout()
@@ -68,7 +68,7 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.plotGroup("cluster")
+    visualizer.plotGroup("continent", "Continent")
 
 
 
