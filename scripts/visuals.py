@@ -11,26 +11,28 @@ class Visualizer:
         self.runNumber = 3;
         self.serverNumbers = [4]
         self.topologies = ["cluster", "continent"]
-        self.protocols= ["QuadTree", "StateVector"]
+        self.protocols = ["QuadTree", "StateVector"]
         self.clientConcentrations = ["concentrated", "very-distributed"]
         self.files = []
+        self.fetchAllFiles()
 
-    def fetchAllFiles(self, topology):
+    def fetchAllFiles(self):
         for serverNumber in self.serverNumbers:
-            for protocol in self.protocols:
-                for clientConcentration in self.clientConcentrations:
-                    for i in range(self.runNumber):
-                        file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
-                        self.files.append(file)
+            for topology in self.topologies:
+                for protocol in self.protocols:
+                    for clientConcentration in self.clientConcentrations:
+                        for i in range(self.runNumber):
+                            file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
+                            self.files.append(file)
 
     def closeAllFiles(self):
         for file in self.files:
             file.close()
 
-    def getMeanAndStandardDeviation(self, protocol, clientConcentration):
+    def getMeanAndStandardDeviation(self, protocol, criteria):
         sync_latencies = []
         for file in self.files:
-           if protocol in file.name and clientConcentration in file.name:
+           if protocol in file.name and criteria in file.name:
                 rows = csv.reader(file, delimiter='\t')
                 for row in rows:
                     value = row[len(row) - 1]
@@ -42,13 +44,12 @@ class Visualizer:
 
         return [numpy.mean(sync_latencies), numpy.std(sync_latencies)]
 
-    def plotGroup(self, topology, clientConcentration):
+    def plotGroup(self, criteria):
 
-        self.fetchAllFiles(topology)
         means = []
         stds = []
         for protocol in self.protocols:
-            values = self.getMeanAndStandardDeviation(protocol, clientConcentration)
+            values = self.getMeanAndStandardDeviation(protocol, criteria)
             print("Avg %s: %f" % (protocol, values[0]))
             print("StD %s: %f" % (protocol, values[1]))
             means.append(values[0])
@@ -62,7 +63,8 @@ class Visualizer:
         axis.set_ylabel("Sync Latencies")
         axis.set_xticks(x_pos)
         axis.set_xticklabels(self.protocols)
-        axis.set_title("Sync Latencies of two different protocols with\nhigh concentration of clients")
+        axis.set_title("Sync Latencies of two different protocols")
+        axis.set_xlabel(criteria)
         axis.yaxis.grid(True)
 
         plotter.tight_layout()
@@ -74,7 +76,7 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.plotGroup("continent", "very-distributed")
+    visualizer.plotGroup("cluster")
 
 
 
