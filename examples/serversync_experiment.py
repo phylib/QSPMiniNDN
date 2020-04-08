@@ -167,11 +167,11 @@ if __name__ == '__main__':
                        requestLevel=requestLevel,
                        treeSize=treeSize,
                        chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
-                       traceFile=traceFile, srcDir=srcDir)
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "StateVector":
             AppManager(ndn, [server[0]], SVSGameServer, responsibility=server[6], logFolder=logDir,
                        treeSize=treeSize, clientId=server[7],
-                       traceFile=traceFile, srcDir=srcDir)
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "ZMQ":
             otherPeers = [(remote[0].intfs[0].ip, 5000 + remote[7]) for remote in servers if
                           remote[0].name != server[0].name]
