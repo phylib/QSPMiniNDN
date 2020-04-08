@@ -130,21 +130,13 @@ def do_calculation(resultDir):
         updates_missing = {server: 0 for server in servers}
         updates_latencies = {server: 0 for server in servers}
 
-        for index, row in tqdm(syncLatencies.iterrows(), total=len(syncLatencies), desc="Calculating sync latencies"):
-            producer = row["producer"]
-            for server in servers:
-                if server == producer:
-                    continue
-                if float(row["sync_latency_" + server]) >= 0.0:
-                    updates_received[server] += 1
-                    updates_latencies[server] += float(row["sync_latency_" + server])
-                else:
-                    updates_missing[server] += 1
-        for server in updates_latencies:
-            if updates_received[server] == 0:
-                updates_latencies[server] = float("NaN")
-            else:
-                updates_latencies[server] = updates_latencies[server] / updates_received[server]
+        for server in servers:
+            consumer_rows = syncLatencies[syncLatencies["producer"] != server]
+            received_rows = consumer_rows[consumer_rows["sync_latency_" + server] >= 0]
+            updates_received[server] = len(received_rows)
+            updates_missing[server] = len(consumer_rows) - len(received_rows)
+            updates_latencies[server] = received_rows["sync_latency_" + server].mean()
+
         summay_cols = ['server', 'received', 'lost', 'avg_latency']
         summary_rows = []
         for server in servers:
