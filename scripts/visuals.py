@@ -53,8 +53,9 @@ class Visualizer:
 
 
         x_pos = numpy.arange(len(self.protocols))
+        colors = ['red', 'green', 'blue']
         figure, axis = plotter.subplots()
-        axis.bar(x_pos, means, yerr=stds, align="center", alpha=0.5, ecolor="black", capsize=10)
+        axis.bar(x_pos, means, yerr=stds, align="center", alpha=0.8, ecolor="black", capsize=10, color = colors)
         axis.set_ylabel("Sync Latencies")
         axis.set_xticks(x_pos)
         axis.set_xticklabels(self.protocols)
