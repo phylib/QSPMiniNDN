@@ -25,10 +25,10 @@ class Visualizer:
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
 
-    def getMeanPerRun(self, protocol, criteria, run):
+    def getMeanPerRun(self, protocol, group, criteria, run):
         sync_latencies = []
         for file in self.files:
-            if protocol in file.name and criteria in file.name and run in file.name:
+            if protocol in file.name and group in file.name and criteria in file.name and run in file.name:
 
                 for row in file.values:
                     value = row[0]
@@ -38,13 +38,13 @@ class Visualizer:
         return numpy.mean(sync_latencies)
 
 
-    def plotGroup(self, criteria, sublabel):
+    def plotGroup(self, group, criteria, sublabel):
         means = []
         stds = []
         for protocol in self.protocols:
             runmeans = []
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(protocol, criteria, str(i))
+                mean = self.getMeanPerRun(protocol, group, criteria, str(i))
                 runmeans.append(mean)
             means.append(numpy.mean(runmeans))
             stds.append(numpy.std(runmeans))
@@ -66,10 +66,57 @@ class Visualizer:
         plotter.tight_layout()
         plotter.show()
 
+    def getProtocolData(self, protocol, criteria, groups):
+        means = []
+        stds = []
+        for group in groups:
+            runmeans = []
+            for i in range(self.runNumber):
+                mean = self.getMeanPerRun(protocol, group, criteria, str(i))
+                runmeans.append(mean)
+            means.append(numpy.mean(runmeans))
+            stds.append(numpy.std(runmeans))
+            print("Avg %s: %f" % (protocol, means[len(means) - 1]))
+            print("StD %s: %f" % (protocol, stds[len(stds) - 1]))
+
+        return [means, stds]
+
+    def plotAll(self, criteria, groups):
+        means = []
+        stds = []
+
+        for protocol in self.protocols:
+            data = self.getProtocolData(protocol, criteria, groups)
+            means.append(data[0])
+            stds.append(data[1])
+
+        x_pos = numpy.arange(len(groups))
+        width = 0.25
+        colors = ['red', 'green', 'blue']
+        figure, axis = plotter.subplots()
+        quadTree = axis.bar(x_pos, means[0], width, yerr=stds[0], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[0])
+        stateVector = axis.bar(x_pos+width, means[1], width,yerr=stds[1], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[1])
+        zmq = axis.bar(x_pos+2*width, means[2], width, yerr=stds[2], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[2])
+
+        axis.set_ylabel("Sync Latencies")
+        axis.set_xticks(x_pos+width)
+        axis.set_xticklabels(groups)
+        axis.set_title("Sync Latencies of three different protocols\nusing two different topologies")
+        axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
+
+        axis.yaxis.grid(True)
+
+        plotter.tight_layout()
+        plotter.show()
+
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.plotGroup("continent", "Continent")
+    visualizer.plotAll("concentrated", ["cluster", "continent"])
+
+    ''' Use the following statements to plot the data by ONE topology'''
+    #visualizer.plotGroup("cluster", "concentrated", "concentrated cluster")
+    #visualizer.plotGroup("continent", "concentrated", "concentrated continent")
 
 
 
