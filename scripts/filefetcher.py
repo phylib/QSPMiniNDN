@@ -8,4 +8,5 @@ class FileFetcher:
         fileDirectory = ("RESULTS_%d_%s_%s_run%d_ChunkChanges-%scsv" %(numServers, topology, protocol, runNumber, clientConcentration))
         filename = fileDirectory + ".csv"
         file = open(self.csvDirectory+"/"+fileDirectory+"/"+filename, "r")
+        #print(filename)
         return file
