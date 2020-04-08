@@ -11,7 +11,7 @@ class Visualizer:
         self.runNumber = 3;
         self.serverNumbers = [4]
         self.topologies = ["cluster", "continent"]
-        self.protocols = ["QuadTree", "StateVector"]
+        self.protocols = ["QuadTree", "StateVector", "ZMQ"]
         self.clientConcentrations = ["concentrated", "very-distributed"]
         self.files = []
         self.fetchAllFiles()
@@ -25,20 +25,14 @@ class Visualizer:
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
 
-    def closeAllFiles(self):
-        for file in self.files:
-            file.close()
-
     def getMeanPerRun(self, protocol, criteria, run):
         sync_latencies = []
         for file in self.files:
             if protocol in file.name and criteria in file.name and run in file.name:
-                rows = csv.reader(file, delimiter='\t')
-                for row in rows:
-                    value = row[len(row) - 1]
 
-                    # check if value is integer or float
-                    if (re.fullmatch(r'[0-9]+(\.[0-9]+){0,1}', value)):
+                for row in file.values:
+                    value = row[0]
+                    if(value >= 0.0):
                         sync_latencies.append(float(value))
 
         return numpy.mean(sync_latencies)
@@ -57,9 +51,6 @@ class Visualizer:
             print("Avg %s: %f" % (protocol, means[len(means)-1]))
             print("StD %s: %f" % (protocol, stds[len(stds)-1]))
 
-
-
-        self.closeAllFiles()
 
         x_pos = numpy.arange(len(self.protocols))
         figure, axis = plotter.subplots()
