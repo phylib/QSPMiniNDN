@@ -97,11 +97,12 @@ class Visualizer:
         quadTree = self.getBar(axis, x_pos, means[0], width, stds[0], "black", 10, colors[0], "black")
         stateVector = self.getBar(axis, x_pos + width, means[1], width, stds[1], "black", 10, colors[1], "black")
         zmq = self.getBar(axis, x_pos + 2*width, means[2], width, stds[2], "black", 10, colors[2], "black")
+
         axis.set_ylabel("Sync Latencies")
         self.removeTicks(showLabel=True)
         axis.set_xticks(x_pos+width)
         axis.set_xticklabels(groups)
-        axis.set_title("Sync Latencies of three different protocols\nusing two different topologies")
+        axis.set_title("Sync Latencies of three different protocols")
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
         axis.yaxis.grid(True)
@@ -123,11 +124,11 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.plotAll("concentrated", ["cluster", "continent"])
+    #visualizer.plotAll("concentrated", ["continent", "cluster"])
 
     ''' Use the following statements to plot the data by ONE topology'''
     #visualizer.plotGroup("cluster", "concentrated", "concentrated cluster")
-    #visualizer.plotGroup("continent", "concentrated", "concentrated continent")
+    visualizer.plotGroup("continent", "concentrated", "concentrated continent")
 
 
 
