@@ -53,9 +53,9 @@ class Visualizer:
 
 
         x_pos = numpy.arange(len(self.protocols))
-        colors = ['red', 'green', 'blue']
+        colors = [(1, 1, 1, 1), (0.6, 0.6, 0.6, 1), (0.2, 0.2, 0.2, 1)]
         figure, axis = plotter.subplots()
-        axis.bar(x_pos, means, yerr=stds, align="center", alpha=0.8, ecolor="black", capsize=10, color = colors)
+        axis.bar(x_pos, means, yerr=stds, ecolor="black", capsize=10, color = colors, edgecolor='black')
         axis.set_ylabel("Sync Latencies")
         axis.set_xticks(x_pos)
         axis.set_xticklabels(self.protocols)
@@ -92,11 +92,11 @@ class Visualizer:
 
         x_pos = numpy.arange(len(groups))
         width = 0.25
-        colors = ['red', 'green', 'blue']
+        colors = [(1, 1, 1, 1), (0.6, 0.6, 0.6, 1), (0.2, 0.2, 0.2, 1)]
         figure, axis = plotter.subplots()
-        quadTree = axis.bar(x_pos, means[0], width, yerr=stds[0], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[0])
-        stateVector = axis.bar(x_pos+width, means[1], width,yerr=stds[1], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[1])
-        zmq = axis.bar(x_pos+2*width, means[2], width, yerr=stds[2], align="center", alpha=0.8, ecolor="black", capsize=10, color = colors[2])
+        quadTree = axis.bar(x_pos, means[0], width, yerr=stds[0], ecolor="black", capsize=10, color = colors[0], edgecolor='black')
+        stateVector = axis.bar(x_pos+width, means[1], width,yerr=stds[1], ecolor="black", capsize=10, color = colors[1], edgecolor='black')
+        zmq = axis.bar(x_pos+2*width, means[2], width, yerr=stds[2], ecolor="black", capsize=10, color = colors[2], edgecolor='black')
 
         axis.set_ylabel("Sync Latencies")
         axis.set_xticks(x_pos+width)
