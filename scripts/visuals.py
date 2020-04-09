@@ -23,13 +23,12 @@ class Visualizer:
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
 
-    def getMeanPerRun(self, serverNumber, protocol, group, criteria, run):
+    def getMeanPerRun(self, protocol, group, criterias, run):
         sync_latencies = []
         for file in self.files:
-            if str(serverNumber) in file.name \
-                    and protocol in file.name \
+            if protocol in file.name \
                     and group in file.name \
-                    and criteria in file.name \
+                    and all(criteria in file.name for criteria in criterias) \
                     and run in file.name:
 
                 for row in file.values:
@@ -40,13 +39,13 @@ class Visualizer:
         return numpy.mean(sync_latencies)
 
 
-    def plotGroup(self, serverNumber, group, criteria, sublabel):
+    def plotGroup(self, criterias, group, sublabel):
         means = []
         stds = []
         for protocol in self.protocols:
             runmeans = []
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(serverNumber, protocol, group, criteria, str(i))
+                mean = self.getMeanPerRun(protocol, group, criterias, str(i))
                 runmeans.append(mean)
             means.append(numpy.mean(runmeans))
             stds.append(numpy.std(runmeans))
@@ -71,13 +70,13 @@ class Visualizer:
         plotter.tight_layout()
         plotter.show()
 
-    def getProtocolData(self, serverNumber, protocol, criteria, groups):
+    def getProtocolData(self, protocol, criterias, groups):
         means = []
         stds = []
         for group in groups:
             runmeans = []
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(serverNumber, protocol, group, criteria, str(i))
+                mean = self.getMeanPerRun(protocol, group, criterias, str(i))
                 runmeans.append(mean)
             means.append(numpy.mean(runmeans))
             stds.append(numpy.std(runmeans))
@@ -86,12 +85,12 @@ class Visualizer:
 
         return [means, stds]
 
-    def plotAll(self, serverNumber, criteria, groups):
+    def plotAll(self, criterias, groups):
         means = []
         stds = []
 
         for protocol in self.protocols:
-            data = self.getProtocolData(serverNumber, protocol, criteria, groups)
+            data = self.getProtocolData(protocol, criterias, groups)
             means.append(data[0])
             stds.append(data[1])
 
@@ -131,11 +130,12 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    visualizer.plotAll(16, "concentrated", ["continent", "cluster"])
+    visualizer.plotAll(["16", "concentrated"], ["continent", "cluster"])
+    #visualizer.plotAll([], ["4", "16"])
 
     ''' Use the following statements to plot the data by ONE topology'''
-    #visualizer.plotGroup(4, "cluster", "concentrated", "concentrated cluster")
-    #visualizer.plotGroup(4, "continent", "concentrated", "concentrated continent")
+    #visualizer.plotGroup(["16","concentrated"], "cluster", "concentrated cluster")
+    #visualizer.plotGroup(["16", "concentrated"], "continent", "concentrated continent")
 
 
 
