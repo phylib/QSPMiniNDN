@@ -6,8 +6,8 @@ class Visualizer:
 
     def __init__(self):
         self.fileFetcher = FileFetcher("../result-csv-files")
-        self.runNumber = 3;
-        self.serverNumbers = [4]
+        self.runNumber = 3
+        self.serverNumbers = [4, 16]
         self.topologies = ["cluster", "continent"]
         self.protocols = ["QuadTree", "StateVector", "ZMQ"]
         self.clientConcentrations = ["concentrated", "very-distributed"]
@@ -23,26 +23,30 @@ class Visualizer:
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
 
-    def getMeanPerRun(self, protocol, group, criteria, run):
+    def getMeanPerRun(self, serverNumber, protocol, group, criteria, run):
         sync_latencies = []
         for file in self.files:
-            if protocol in file.name and group in file.name and criteria in file.name and run in file.name:
+            if str(serverNumber) in file.name \
+                    and protocol in file.name \
+                    and group in file.name \
+                    and criteria in file.name \
+                    and run in file.name:
 
                 for row in file.values:
                     value = row[0]
-                    if(value >= 0.0):
+                    if value >= 0.0:
                         sync_latencies.append(float(value))
 
         return numpy.mean(sync_latencies)
 
 
-    def plotGroup(self, group, criteria, sublabel):
+    def plotGroup(self, serverNumber, group, criteria, sublabel):
         means = []
         stds = []
         for protocol in self.protocols:
             runmeans = []
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(protocol, group, criteria, str(i))
+                mean = self.getMeanPerRun(serverNumber, protocol, group, criteria, str(i))
                 runmeans.append(mean)
             means.append(numpy.mean(runmeans))
             stds.append(numpy.std(runmeans))
@@ -60,18 +64,20 @@ class Visualizer:
         axis.legend((bar[0],bar[1],bar[2]), self.protocols)
         axis.set_title("Sync Latencies of three different protocols")
         axis.set_xlabel(sublabel)
+
+        axis.set_axisbelow(True)
         axis.yaxis.grid(True)
 
         plotter.tight_layout()
         plotter.show()
 
-    def getProtocolData(self, protocol, criteria, groups):
+    def getProtocolData(self, serverNumber, protocol, criteria, groups):
         means = []
         stds = []
         for group in groups:
             runmeans = []
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(protocol, group, criteria, str(i))
+                mean = self.getMeanPerRun(serverNumber, protocol, group, criteria, str(i))
                 runmeans.append(mean)
             means.append(numpy.mean(runmeans))
             stds.append(numpy.std(runmeans))
@@ -80,12 +86,12 @@ class Visualizer:
 
         return [means, stds]
 
-    def plotAll(self, criteria, groups):
+    def plotAll(self, serverNumber, criteria, groups):
         means = []
         stds = []
 
         for protocol in self.protocols:
-            data = self.getProtocolData(protocol, criteria, groups)
+            data = self.getProtocolData(serverNumber, protocol, criteria, groups)
             means.append(data[0])
             stds.append(data[1])
 
@@ -105,6 +111,7 @@ class Visualizer:
         axis.set_title("Sync Latencies of three different protocols")
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
+        axis.set_axisbelow(True)
         axis.yaxis.grid(True)
 
         plotter.tight_layout()
@@ -124,11 +131,11 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    #visualizer.plotAll("concentrated", ["continent", "cluster"])
+    visualizer.plotAll(16, "concentrated", ["continent", "cluster"])
 
     ''' Use the following statements to plot the data by ONE topology'''
-    #visualizer.plotGroup("cluster", "concentrated", "concentrated cluster")
-    visualizer.plotGroup("continent", "concentrated", "concentrated continent")
+    #visualizer.plotGroup(4, "cluster", "concentrated", "concentrated cluster")
+    #visualizer.plotGroup(4, "continent", "concentrated", "concentrated continent")
 
 
 
