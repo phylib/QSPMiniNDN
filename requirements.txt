@@ -3,3 +3,4 @@ setuptools
 tqdm
 pandas
 matplotlib
+pyshark
