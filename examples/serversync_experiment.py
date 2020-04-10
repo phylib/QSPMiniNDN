@@ -101,6 +101,7 @@ if __name__ == '__main__':
     if is_ndn_eval:  # NFD is only required in NDN evaluations
         info('Starting NFD on nodes\n')
         nfds = AppManager(ndn, ndn.net.hosts, Nfd)
+    time.sleep(5) # Wait until all NFDs are started
 
     ####### Here, the real magic is starting #######
 
