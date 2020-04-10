@@ -17,12 +17,12 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
     ]
     protocols = [
         "QuadTree",
-        # "StateVector",
-        # "ZMQ"
+        "StateVector",
+        "ZMQ"
     ]
 
     types = [
-        # "continent",
+        "continent",
         "cluster"
     ]
     traceFiles = [
