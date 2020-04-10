@@ -51,6 +51,10 @@ class Tshark(Application):
         # Start capturing traffic with Tshark. Create one logfile for every interface
         debug("[{0}] Starting tshark logging\n".format(self.node.name))
 
+        ip_addresses = [self.node.intfs[intf].ip for intf in self.node.intfs]
+        self.node.cmd("ifconfig &> {}/ifconfig.out".format(self.logFolder))
+        self.node.cmd("echo {} > {}/ip-adresses.txt".format(",".join(ip_addresses), self.logFolder))
+
         if self.singleLogFile:
             interfaces = ["-i " + intf for intf in self.node.intfNames()]
             ndnDumpOutputFile = "{}{}-interfaces.pcap".format(self.logFolder, self.node.name)
