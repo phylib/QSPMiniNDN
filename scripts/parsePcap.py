@@ -4,9 +4,10 @@ import os
 import argparse
 import time
 import copy
-import json
 import multiprocessing
 from multiprocessing import Pool
+import glob
+import tqdm
 
 IP_SERVER_SYNC_PORT = "5555"
 MC_SERVER_PORT = "25565"
@@ -35,16 +36,16 @@ def append_stat_dict_to_file(stat_dict, output_file_path):
     with open(output_file_path, "a") as output_file:
         output_file.write(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(stat_dict["node"],
-                                                                                stat_dict["in/out"],
-                                                                                stat_dict["#interests"],
-                                                                                stat_dict["bytesInterests"],
-                                                                                stat_dict["#data"],
-                                                                                stat_dict["bytesData"],
-                                                                                stat_dict["#Nack"],
-                                                                                stat_dict["bytesNack"],
-                                                                                stat_dict["#IPSyncPackets"],
-                                                                                stat_dict["bytesIPSyncPackets"],
-                                                                                stat_dict["bytesSyncPayload"]))
+                                                                  stat_dict["in/out"],
+                                                                  stat_dict["#interests"],
+                                                                  stat_dict["bytesInterests"],
+                                                                  stat_dict["#data"],
+                                                                  stat_dict["bytesData"],
+                                                                  stat_dict["#Nack"],
+                                                                  stat_dict["bytesNack"],
+                                                                  stat_dict["#IPSyncPackets"],
+                                                                  stat_dict["bytesIPSyncPackets"],
+                                                                  stat_dict["bytesSyncPayload"]))
 
 
 def get_parent_dir(directory):
@@ -144,31 +145,34 @@ def parse_pcap_file(pcap_file, output_csv):
 
 def parse_directory(directory, fullPath):
     # write header to output file (overwrite existing)
-    output_file_path = os.path.join(output_dir, directory + ".csv")
+    output_file_path = os.path.join(fullPath, "network-stats.csv")
     with open(output_file_path, "w") as output_file:
         output_file.write(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("node", "in/out", "#interests",
-                                                                                "bytesInterests", "#data",
-                                                                                "bytesData", "#Nack", "bytesNack",
-                                                                                "#IPSyncPackets",
-                                                                                "bytesIPSyncPackets", "bytesSyncPayload"))
+                                                                  "bytesInterests", "#data",
+                                                                  "bytesData", "#Nack", "bytesNack",
+                                                                  "#IPSyncPackets",
+                                                                  "bytesIPSyncPackets", "bytesSyncPayload"))
     print("Parsing folder: " + fullPath)
-    host_path = os.path.join(fullPath, "link-state/faces-3")
+    logfiles = glob.glob(fullPath + "/**/*_chunklog.csv", recursive=True)
+    # Logfile syntax is [setting-directory]/[hostname]/log/[logfilename]
+    hostnames = [logfile.split("/")[-3] for logfile in logfiles]
+    print(hostnames)
 
     # todo: Search for servers instead of processing all folders
-    for subfolder in get_immediate_subdirectories(host_path):
-        if subfolder.startswith("h"):
-            pcap_dir = os.path.join(host_path, subfolder, "results")
+    for host in hostnames:
+        pcap_dir = os.path.join(fullPath, host, "log")
 
-            for file in os.listdir(pcap_dir):
-                if file.endswith(".pcap"):
-                    proc_pool_args.append((os.path.join(pcap_dir, file), output_file_path))
+        for file in os.listdir(pcap_dir):
+            if file.endswith(".pcap"):
+                proc_pool_args.append((os.path.join(pcap_dir, file), output_file_path))
 
 
 if __name__ == "__main__":
     # entry point of script
     num_cpus = multiprocessing.cpu_count()
-    used_cpus = max(1, int(num_cpus / 2))  # leave room for one tshark-process for every concurrently processed pcap-file
+    used_cpus = max(1,
+                    int(num_cpus / 2))  # leave room for one tshark-process for every concurrently processed pcap-file
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-r", "--result-dir", help="Directory containing the result dirs of the runs",
@@ -193,4 +197,6 @@ if __name__ == "__main__":
             print("skipping directory: " + os.path.join(input, subfolder))
 
     # concurrently process as many pcap files as possible
-    p.map(parse_pcap, proc_pool_args)
+    # p.map(parse_pcap, proc_pool_args)
+    for _ in tqdm.tqdm(p.imap_unordered(parse_pcap, proc_pool_args), total=len(proc_pool_args)):
+        pass
