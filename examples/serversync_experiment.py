@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     ####### Define evaluation specific parameters #######
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-servers', dest='numServers', type=int, default=4, choices=[4, 16])
+    parser.add_argument('--num-servers', dest='numServers', type=int, default=4, choices=[4, 16, 64])
     parser.add_argument('--log-dir', dest='logDir', default="log/")
     parser.add_argument('--tree-size', dest='treeSize', default=65536)
     parser.add_argument('--prefix', dest='prefix', default="/world")
@@ -143,12 +143,17 @@ if __name__ == '__main__':
         grh = NdnRoutingHelper(ndn.net)
         # For all host, pass ndn.net.hosts or a list, [ndn.net['a'], ..] or [ndn.net.hosts[0],.]
         for server in servers:
-            if protocol == 'QuadTree' or protocol == 'P2P':
+            if protocol == 'QuadTree':
                 grh.addOrigin([server[0]], [server[5]])
             elif protocol == 'StateVector':
                 # Register requrired prefixes
                 grh.addOrigin([server[0]], "/ndn/svs/syncNotify")
                 grh.addOrigin([server[0]], "/ndn/svs/vsyncData")
+            elif protocol == 'P2P':
+                nameComponents = server[5].split("/")
+                names = ['/'.join(nameComponents[:i]) for i in range(3, len(nameComponents) + 1)]
+                grh.addOrigin([server[0]], names)
+
         grh.calculateNPossibleRoutes(nFaces=1)
 
         if protocol == 'StateVector':
