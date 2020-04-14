@@ -181,13 +181,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-r", "--result-dir", help="Directory containing the result dirs of the runs",
                         default="./")
-    parser.add_argument("-o", "--output", help="Output directory", default="./")
     parser.add_argument("-p", "--processes", help="Size of process pool", type=int,
                         default=used_cpus)
     args = parser.parse_args()
 
     input = args.result_dir
-    output_dir = os.path.abspath(args.output)
     used_cpus = args.processes
     print("detected " + str(num_cpus) + " cpu(s), using " + str(used_cpus) + " cpu(s)")
 
