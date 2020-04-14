@@ -107,7 +107,7 @@ class Visualizer:
         self.removeTicks(showLabel=False)
         axis.legend((bar[0], bar[1], bar[2]), self.protocols)
         axis.set_title("Sync Latencies of three different protocols")
-        axis.set_xlabel(sublabel)
+        axis.set_xlabel("Setting: " + sublabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -149,7 +149,7 @@ class Visualizer:
 
         return [means, stds]
 
-    def plotAll(self, filterCriteria, barGroups):
+    def plotAll(self, filterCriteria, barGroups, sublabel):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -160,6 +160,9 @@ class Visualizer:
         """
         means = []
         stds = []
+        labels = []
+        for barGroup in barGroups:
+            labels.append(barGroup.capitalize())
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -184,7 +187,8 @@ class Visualizer:
         axis.set_ylabel("Sync Latencies")
         self.removeTicks(showLabel=True)
         axis.set_xticks(x_pos+width)
-        axis.set_xticklabels(barGroups)
+        axis.set_xticklabels(labels)
+        axis.set_xlabel("Setting: " + sublabel)
         axis.set_title("Sync Latencies of three different protocols")
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
@@ -216,12 +220,12 @@ class Visualizer:
 if __name__ == "__main__":
 
     visualizer = Visualizer()
-    #visualizer.plotAll(["16","concentrated"], ["continent", "cluster"])
+    #visualizer.plotAll(["16","concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
     #visualizer.plotAll([], ["4", "16"])
 
     ''' Use the following statements to plot the data by ONE topology'''
-    #visualizer.plotGroup(["16","concentrated"], "cluster", "concentrated cluster")
-    visualizer.plotGroup(["16", "concentrated"], "continent", "concentrated continent")
+    visualizer.plotGroup(["16","concentrated"], "cluster", "cluster topology and high client concentration")
+    #visualizer.plotGroup(["16", "concentrated"], "continent", "concentrated continent")
 
 
 
