@@ -160,7 +160,7 @@ def parse_directory(directory, fullPath):
     print("Parsing folder: " + fullPath)
     logfiles = glob.glob(fullPath + "/**/*_chunklog.csv", recursive=True)
     # Logfile syntax is [setting-directory]/[hostname]/log/[logfilename]
-    hostnames = [logfile.split("/")[-3] for logfile in logfiles]
+    hostnames = list(set([logfile.split("/")[-3] for logfile in logfiles]))
     print(hostnames)
 
     # todo: Search for servers instead of processing all folders
