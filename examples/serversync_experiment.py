@@ -40,6 +40,7 @@ from minindn.helpers.ndn_routing_helper import NdnRoutingHelper
 from minindn.helpers.ip_routing_helper import IPRoutingHelper
 from minindn.helpers.nfdc import Nfdc
 from minindn.apps.QuadTreeGameServer import QuadTreeGameServer
+from minindn.apps.P2PGameServer import P2PGameServer
 from minindn.apps.SVSGameServer import SVSGameServer
 from minindn.apps.ZMQGameServer import ZMQGameServer
 
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('--level-difference', dest='levelDifference', default=2)
     parser.add_argument('--console', dest='console', default=False, type=bool)
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
-    parser.add_argument('--protocol', dest='protocol', default="QuadTree", choices=["QuadTree", "StateVector", "ZMQ"])
+    parser.add_argument('--protocol', dest='protocol', default="QuadTree",
+                        choices=["QuadTree", "StateVector", "ZMQ", "P2P"])
     parser.add_argument('--trace-file', dest='traceFile',
                         default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
     parser.add_argument('--src-dir', dest='srcDir', default="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/")
@@ -101,7 +103,7 @@ if __name__ == '__main__':
     if is_ndn_eval:  # NFD is only required in NDN evaluations
         info('Starting NFD on nodes\n')
         nfds = AppManager(ndn, ndn.net.hosts, Nfd)
-    time.sleep(5) # Wait until all NFDs are started
+    time.sleep(5)  # Wait until all NFDs are started
 
     ####### Here, the real magic is starting #######
 
@@ -141,7 +143,7 @@ if __name__ == '__main__':
         grh = NdnRoutingHelper(ndn.net)
         # For all host, pass ndn.net.hosts or a list, [ndn.net['a'], ..] or [ndn.net.hosts[0],.]
         for server in servers:
-            if protocol == 'QuadTree':
+            if protocol == 'QuadTree' or protocol == 'P2P':
                 grh.addOrigin([server[0]], [server[5]])
             elif protocol == 'StateVector':
                 # Register requrired prefixes
@@ -179,6 +181,11 @@ if __name__ == '__main__':
             AppManager(ndn, [server[0]], ZMQGameServer, responsibility=server[6], logFolder=logDir,
                        serverPort=(5000 + server[7]), otherPeers=otherPeers, clientId=server[7], traceFile=traceFile,
                        srcDir=srcDir + "/ZMQSyncPeer")
+        elif protocol == "P2P":
+            AppManager(ndn, [server[0]], P2PGameServer, responsibility=server[6], logFolder=logDir,
+                       treeSize=treeSize, chunkThreshold=ndn.args.chunkThreshold,
+                       levelDifference=ndn.args.levelDifference,
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
 
     ################### Do the evaluation ###################
     # Sleep until the end of the evaluation + a bit more
