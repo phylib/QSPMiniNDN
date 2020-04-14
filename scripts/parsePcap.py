@@ -84,57 +84,61 @@ def parse_pcap_file(pcap_file, output_csv):
     stat_out["in/out"] = "out"
 
     cap = pyshark.FileCapture(pcap_file, only_summaries=False)
-    cap.set_debug(PYSHARK_DEBUG)
+    #cap.set_debug(PYSHARK_DEBUG)
+    # cap.set_debug()
 
-    for packet in cap:
-        # Skip packets that are neighter TCP nor UDP
-        if not hasattr(packet, "udp") and not hasattr(packet, "tcp"):  # skip certain packets (ARP, ICMP)
-            continue
+    try:
+        for packet in cap:
+            # Skip packets that are neighter TCP nor UDP
+            if not hasattr(packet, "udp") and not hasattr(packet, "tcp"):  # skip certain packets (ARP, ICMP)
+                continue
 
-        # determine if incoming/outgoing
-        stat = stat_in  # incoming data by default
-        if packet.ip.src in own_ips:  # outgoing if src is own_ip
-            stat = stat_out
-        elif (packet.ip.dst not in own_ips):
-            continue  # happens when packet was forwarded only
+            # determine if incoming/outgoing
+            stat = stat_in  # incoming data by default
+            if packet.ip.src in own_ips:  # outgoing if src is own_ip
+                stat = stat_out
+            elif (packet.ip.dst not in own_ips):
+                continue  # happens when packet was forwarded only
 
-        # get packet infos
-        if hasattr(packet, "ndn"):
-            ndn_packet_type = packet.ndn._ws_lua_text.split(',')[0]
-            if ndn_packet_type == "Interest":
-                stat["#interests"] += 1
-                stat["bytesInterests"] += int(packet.length)
-            elif ndn_packet_type == "Data":
-                stat["#data"] += 1
-                stat["bytesData"] += int(packet.length)
+            # get packet infos
+            if hasattr(packet, "ndn"):
+                ndn_packet_type = packet.ndn._ws_lua_text.split(',')[0]
+                if ndn_packet_type == "Interest":
+                    stat["#interests"] += 1
+                    stat["bytesInterests"] += int(packet.length)
+                elif ndn_packet_type == "Data":
+                    stat["#data"] += 1
+                    stat["bytesData"] += int(packet.length)
 
-                # just take binary length of content as upper estimation of transported data (usually just two bytes above the actual size [TYPE, LENGTH])
-                # parsing the TLV is too error prone / to much work
-                # correctness hinges on correctness of Wireshark NDN dissector (ndn.lua, https://github.com/named-data/ndn-tools/tree/master/tools/dissect-wireshark )
-                # https://named-data.net/doc/NDN-packet-spec/current/tlv.html#variable-size-encoding-for-type-t-and-length-l
-                # https://named-data.net/doc/NDN-packet-spec/current/data.html
-                read_len = len(packet.ndn.content.binary_value)
-                stat["bytesSyncPayload"] += read_len
-            elif ndn_packet_type == "Nack" or ndn_packet_type == "LpPacket":
-                stat["#Nack"] += 1
-                stat["bytesNack"] += int(packet.length)
+                    # just take binary length of content as upper estimation of transported data (usually just two bytes above the actual size [TYPE, LENGTH])
+                    # parsing the TLV is too error prone / to much work
+                    # correctness hinges on correctness of Wireshark NDN dissector (ndn.lua, https://github.com/named-data/ndn-tools/tree/master/tools/dissect-wireshark )
+                    # https://named-data.net/doc/NDN-packet-spec/current/tlv.html#variable-size-encoding-for-type-t-and-length-l
+                    # https://named-data.net/doc/NDN-packet-spec/current/data.html
+                    read_len = len(packet.ndn.content.binary_value)
+                    stat["bytesSyncPayload"] += read_len
+                elif ndn_packet_type == "Nack" or ndn_packet_type == "LpPacket":
+                    stat["#Nack"] += 1
+                    stat["bytesNack"] += int(packet.length)
+                else:
+                    print(pcap_file + ": unhandled NDN packet type: " + ndn_packet_type)
+            elif hasattr(packet, "tcp"):
+                ports = [packet.tcp.srcport, packet.tcp.dstport]
+
+                # Segmentation-independent TCP payload. payload_bytes == 67 corresponds to the "Len:" in wireshark line:
+                # Transmission Control Protocol, Src Port: 25565, Dst Port: 55782, Seq: 4488, Ack: 27, Len: 67
+                # payload_bytes == 0 e.g. in case of "ACK"-only
+                payload_bytes = int(packet.tcp.payload.size) if hasattr(packet.tcp, "payload") else 0
+
+                stat["#IPSyncPackets"] += 1
+                stat["bytesIPSyncPackets"] += int(packet.length)
+                stat["bytesSyncPayload"] += payload_bytes
             else:
-                print(pcap_file + ": unhandled NDN packet type: " + ndn_packet_type)
-        elif hasattr(packet, "tcp"):
-            ports = [packet.tcp.srcport, packet.tcp.dstport]
+                print(pcap_file + ": dissector detected no 'ndn' or 'tcp', packet layers: " + str(packet.layers))
 
-            # Segmentation-independent TCP payload. payload_bytes == 67 corresponds to the "Len:" in wireshark line:
-            # Transmission Control Protocol, Src Port: 25565, Dst Port: 55782, Seq: 4488, Ack: 27, Len: 67
-            # payload_bytes == 0 e.g. in case of "ACK"-only
-            payload_bytes = int(packet.tcp.payload.size) if hasattr(packet.tcp, "payload") else 0
-
-            stat["#IPSyncPackets"] += 1
-            stat["bytesIPSyncPackets"] += int(packet.length)
-            stat["bytesSyncPayload"] += payload_bytes
-        else:
-            print(pcap_file + ": dissector detected no 'ndn' or 'tcp', packet layers: " + str(packet.layers))
-
-    cap.close()
+        cap.close()
+    except:
+        print("Could not fully parse PCAP file")
 
     end = time.time()
     print(pcap_file + ": finished in {} seconds".format(end - start))
