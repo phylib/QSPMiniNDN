@@ -2,4 +2,5 @@ python-igraph
 setuptools
 tqdm
 pandas
+numpy
 matplotlib
