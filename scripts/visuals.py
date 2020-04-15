@@ -4,18 +4,21 @@ from scripts.filefetcher import FileFetcher
 
 class Visualizer:
 
-    def __init__(self):
+    def __init__(self, data):
         """
         define the values of all possible filter criteria
         and assign a FileFetcher instance for
         getting the necessary data
         """
-        self.fileFetcher = FileFetcher("../result-csv-files")
+        self.fileFetcher = FileFetcher(data)
         self.runNumber = 3
         self.serverNumbers = [4, 16]
         self.topologies = ["cluster", "continent"]
         self.protocols = ["QuadTree", "StateVector", "ZMQ"]
         self.clientConcentrations = ["concentrated", "very-distributed"]
+        if not(data == "latencies"):
+            self.runNumber = 6
+            self.clientConcentrations.append("distributed")
         self.files = []
         self.fetchAllFiles()
 
@@ -30,6 +33,7 @@ class Visualizer:
                         for i in range(self.runNumber):
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
+                            print(file.name)
 
     def getMeanPerRun(self, protocol, barGroup, filterCriteria, run):
         """
@@ -168,9 +172,9 @@ class Visualizer:
 
 if __name__ == "__main__":
 
-    visualizer = Visualizer()
+    visualizer = Visualizer("network")
 
-    visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
+    #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
     #visualizer.plotGroups(["16", "concentrated"], ["cluster"], "cluster topology and high client concentration")
     #visualizer.plotGroups(["16", "concentrated"], ["continent"], "continent topology and high client concentration")
 
