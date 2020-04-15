@@ -58,8 +58,10 @@ class Visualizer:
         for file in self.files:
             if self.data == "latencies":
                 self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
-            else:
+            elif self.data == "network":
                 self.getValues(file, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
+            else:
+                self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
 
         return numpy.mean(values)
 
@@ -159,9 +161,12 @@ class Visualizer:
         if(self.data == 'latencies'):
             axis.set_ylabel("Sync Latencies")
             axis.set_title("Sync Latencies of three different protocols")
-        else:
+        elif(self.data == "network"):
             axis.set_ylabel("Bytes of Sync Payload")
             axis.set_title("Bytes of Sync Payload of three different protocols")
+        else:
+            axis.set_ylabel("Lost Data")
+            axis.set_title("Lost Data of three different protocols")
 
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
@@ -193,8 +198,9 @@ class Visualizer:
 
 if __name__ == "__main__":
 
-    visualizer = Visualizer("network")
-    visualizer.plotGroups(["16", "concentrated", "cluster"], ["in", "out"], "16 servers in a cluster and high client concentration")
+    visualizer = Visualizer("summary")
+    #visualizer.plotGroups(["16", "very-distributed", "cluster"], ["in", "out"], "16 servers in a cluster and very low client concentration")
+    visualizer.plotGroups(["16", "very-distributed"], ["cluster", "continent"], "16 servers in a cluster and very low client concentration")
 
     #visualizer = Visualizer("latencies")
     #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")

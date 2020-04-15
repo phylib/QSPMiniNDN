@@ -9,8 +9,10 @@ class FileFetcher:
         self.data = data
         if data == "latencies":
             self.csvDirectory = "../result-csv-files"
-        else:
+        elif self.data == "network":
             self.csvDirectory = "../2020-04-14_network-stats"
+        else:
+            self.csvDirectory = "../2020-04-08-all-summaries"
 
     def getCSVFile(self, numServers, topology, protocol, runNumber, clientConcentration):
         """
@@ -18,15 +20,22 @@ class FileFetcher:
         this folder has the same name as the file (without file extension);
         read the necessary file content in a dataframe and return it
         """
-        fileDirectory = ("RESULTS_%d_%s_%s_run%d_ChunkChanges-%scsv" %(numServers, topology, protocol, runNumber, clientConcentration))
+
+        fileDirectory = ("RESULTS_%d_%s_%s_run%d_ChunkChanges-%scsv" % (numServers, topology, protocol, runNumber, clientConcentration))
         if self.data == "latencies":
             filename = fileDirectory + ".csv"
             dataframe = pandas.read_csv(self.csvDirectory+"/"+fileDirectory+"/"+filename, sep="\t", usecols=["syncLatency"])
             dataframe.name = filename
-        else:
+        elif self.data == "network":
             filename = "network-stats.csv"
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
                                         usecols=["in/out", "bytesSyncPayload"])
             dataframe.name = fileDirectory + ".csv"
+        else:
+            filename = "summary.csv"
+            dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
+                                        usecols=["lost"])
+            dataframe.name = fileDirectory + ".csv"
+
 
         return dataframe
