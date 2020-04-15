@@ -17,6 +17,9 @@ class Visualizer:
         self.topologies = ["cluster", "continent"]
         self.protocols = ["QuadTree", "StateVector", "ZMQ"]
         self.clientConcentrations = ["concentrated", "very-distributed"]
+
+        # for analyzing sync latencies there are less
+        # files to get data from
         if not(data == "latencies"):
             self.runNumber = 6
             self.clientConcentrations.append("distributed")
@@ -40,7 +43,7 @@ class Visualizer:
         """
         check for the files of a certain protocol
         and filter by the appropriate criteria depending on
-        whether we analyze network data or sync latencies
+        what should be analyzed (sync latencies, network or summary = default)
         --> return the mean of the filtered values
             in all corresponding files
         """
@@ -48,13 +51,13 @@ class Visualizer:
         run = "run%s" %run
 
         # check for serverNumber --> it is possible that serverNumber = run!
-        # so in order to check for the serverNumber put underlines around the number
+        # so in order to mark the serverNumber as such put underlines around the number
         for i in range(len(filterCriteria)):
             if filterCriteria[i].isnumeric():
                 filterCriteria[i] = "_%s_" %filterCriteria[i]
 
         # parse the necessary values from the file, depending on
-        # whether we want analyze sync latencies or network data
+        # whether we want analyze sync latencies, network data or summaries = default
         for file in self.files:
             if self.data == "latencies":
                 self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
@@ -158,6 +161,8 @@ class Visualizer:
         axis.set_xticks(x_pos + width)
         axis.set_xticklabels(labels)
         axis.set_xlabel("Setting: " + sublabel)
+
+        # set the labels according to the data we analyzed
         if(self.data == 'latencies'):
             axis.set_ylabel("Sync Latencies")
             axis.set_title("Sync Latencies of three different protocols")
