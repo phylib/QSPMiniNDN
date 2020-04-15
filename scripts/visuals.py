@@ -10,6 +10,7 @@ class Visualizer:
         and assign a FileFetcher instance for
         getting the necessary data
         """
+        self.data = data
         self.fileFetcher = FileFetcher(data)
         self.runNumber = 3
         self.serverNumbers = [4, 16]
@@ -33,7 +34,7 @@ class Visualizer:
                         for i in range(self.runNumber):
                             file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                             self.files.append(file)
-                            print(file.name)
+
 
     def getMeanPerRun(self, protocol, barGroup, filterCriteria, run):
         """
@@ -42,23 +43,36 @@ class Visualizer:
         --> return the mean of the sync latencies
             in all corresponding files
         """
-        sync_latencies = []
+        values = []
+        run = "run%s" %run
 
+        # check for serverNumber --> it is possible that serverNumber = run!
+        # so in order to check for the serverNumber put underlines around the number
+        for i in range(len(filterCriteria)):
+            if filterCriteria[i].isnumeric():
+                filterCriteria[i] = "_%s_" %filterCriteria[i]
+
+        # parse the necessary values from the file, depending on
+        # whether we want analyze sync latencies or network data
         for file in self.files:
+            if self.data == "latencies":
+                self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
+            else:
+                self.getValues(file, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
 
-            # check if file matches the pattern we search for
-            if protocol in file.name \
-                    and barGroup in file.name \
-                    and all(criterion in file.name for criterion in filterCriteria) \
-                    and run in file.name:
+        return numpy.mean(values)
 
-                # if there is a match add the sync latency value to the list
-                for row in file.values:
-                    value = row[0]
-                    if value >= 0.0:
-                        sync_latencies.append(float(value))
-
-        return numpy.mean(sync_latencies)
+    def getValues(self, file, dataframe, filterCriteria, values):
+        """
+        add the appropriate values of the filtered files
+        to the values-list
+        """
+        if all(criterion in file.name for criterion in filterCriteria):
+            for row in dataframe.values:
+                value = row[len(row) - 1]
+                if value >= 0.0:
+                    values.append(float(value))
+            print(file.name)
 
 
     def getProtocolData(self, protocol, filterCriteria, barGroups):
@@ -134,7 +148,6 @@ class Visualizer:
         zmq = self.getBar(axis, x_pos + 2 * (width+space), means[2], width, stds[2], "black", 10, colors[2], "black")
 
         # define the labels, legend and remove the ticks
-        axis.set_ylabel("Sync Latencies")
         if(len(barGroups)>1):
             self.removeTicks(showLabel=True)
         else:
@@ -142,7 +155,13 @@ class Visualizer:
         axis.set_xticks(x_pos + width)
         axis.set_xticklabels(labels)
         axis.set_xlabel("Setting: " + sublabel)
-        axis.set_title("Sync Latencies of three different protocols")
+        if(self.data == 'latencies'):
+            axis.set_ylabel("Sync Latencies")
+            axis.set_title("Sync Latencies of three different protocols")
+        else:
+            axis.set_ylabel("Bytes of Sync Payload")
+            axis.set_title("Bytes of Sync Payload of three different protocols")
+
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
         # show a grid along the y-axis and put it behind the bars
@@ -170,10 +189,13 @@ class Visualizer:
             top=False,     # ticks along the top edge are off
             labelbottom=showLabel)
 
+
 if __name__ == "__main__":
 
     visualizer = Visualizer("network")
+    visualizer.plotGroups(["16", "concentrated", "cluster"], ["in", "out"], "16 servers in a cluster and high client concentration")
 
+    #visualizer = Visualizer("latencies")
     #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
     #visualizer.plotGroups(["16", "concentrated"], ["cluster"], "cluster topology and high client concentration")
     #visualizer.plotGroups(["16", "concentrated"], ["continent"], "continent topology and high client concentration")
