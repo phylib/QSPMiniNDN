@@ -170,8 +170,8 @@ if __name__ == "__main__":
 
     visualizer = Visualizer()
 
-    #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
+    visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
     #visualizer.plotGroups(["16", "concentrated"], ["cluster"], "cluster topology and high client concentration")
-    visualizer.plotGroups(["16", "concentrated"], ["continent"], "continent topology and high client concentration")
+    #visualizer.plotGroups(["16", "concentrated"], ["continent"], "continent topology and high client concentration")
 
 

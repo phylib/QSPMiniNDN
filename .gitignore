@@ -8,6 +8,7 @@ Mini_NDN.egg-info
 venv
 result-csv-files
 sample-pcap-files
+2020-04-14_network-stats
 
 # Docs
 docs/html
