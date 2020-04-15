@@ -39,8 +39,9 @@ class Visualizer:
     def getMeanPerRun(self, protocol, barGroup, filterCriteria, run):
         """
         check for the files of a certain protocol
-        and filter by barGroup, filterCriteria and run number
-        --> return the mean of the sync latencies
+        and filter by the appropriate criteria depending on
+        whether we analyze network data or sync latencies
+        --> return the mean of the filtered values
             in all corresponding files
         """
         values = []
