@@ -20,8 +20,9 @@ class FileFetcher:
         this folder has the same name as the file (without file extension);
         read the necessary file content in a dataframe and return it
         """
-
         fileDirectory = ("RESULTS_%d_%s_%s_run%d_ChunkChanges-%scsv" % (numServers, topology, protocol, runNumber, clientConcentration))
+
+        # check what should be analyzed and get the correct files
         if self.data == "latencies":
             filename = fileDirectory + ".csv"
             dataframe = pandas.read_csv(self.csvDirectory+"/"+fileDirectory+"/"+filename, sep="\t", usecols=["syncLatency"])
