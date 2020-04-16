@@ -40,7 +40,7 @@ class Visualizer:
                             self.files.append(file)
 
 
-    def getMeanPerRun(self, protocol, barGroup, filterCriteria, run, column=None):
+    def getMeanPerRun(self, protocol, barGroup, filterCriteria, run, columnFilter=None):
         """
         check for the files of a certain protocol
         and filter by the appropriate criteria depending on
@@ -65,7 +65,10 @@ class Visualizer:
             elif self.data == "network":
                 self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
             elif self.data == "packets":
-                frame = {column: file[column]}
+                # columnFilter[0] defines if we filter by 'in' or 'out'
+                # columnFilter[1] defines the column-name
+                frame = {columnFilter[1]:file[file['in/out'] == columnFilter[0]][columnFilter[1]]}
+                #frame = {columnFilter[1]: file[columnFilter[1]]}
                 self.getValues(file.name, pandas.DataFrame(frame), [protocol, barGroup, run] + filterCriteria, values)
             else:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
@@ -86,7 +89,7 @@ class Visualizer:
             print(filename)
 
 
-    def getProtocolData(self, protocol, filterCriteria, barGroups, column = None):
+    def getProtocolData(self, protocol, filterCriteria, barGroups, columnFilter = None):
         """
         return the means + standard deviations per bar group
         of a certain protocol
@@ -103,7 +106,7 @@ class Visualizer:
             # calculate the means per run of each bar group for a certain protocol
             for i in range(self.runNumber):
                 if self.data == "packets":
-                    mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i), column)
+                    mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i), columnFilter)
                     runmeans.append(mean)
                 else:
                     mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i))
@@ -158,9 +161,9 @@ class Visualizer:
         figure, axis = plotter.subplots()
 
         # define the bars for each protocol we want to represent in the different bar groups
-        quadTree = self.getBar(axis, x_pos, means[0], width, stds[0], "black", 10, colors[0], "black")
-        stateVector = self.getBar(axis, x_pos + (width+space), means[1], width, stds[1], "black", 10, colors[1], "black")
-        zmq = self.getBar(axis, x_pos + 2 * (width+space), means[2], width, stds[2], "black", 10, colors[2], "black")
+        quadTree = self.getBar(axis, x_pos, means[0], width, None, stds[0], "black", 10, colors[0], "black")
+        stateVector = self.getBar(axis, x_pos + (width+space), means[1], width, None, stds[1], "black", 10, colors[1], "black")
+        zmq = self.getBar(axis, x_pos + 2 * (width+space), means[2], width, None, stds[2], "black", 10, colors[2], "black")
 
         # define the labels, legend and remove the ticks
         if(len(barGroups)>1):
@@ -207,20 +210,62 @@ class Visualizer:
 
         for protocol in self.protocols:
             packetmeans = []
-            for column in ["#interests", "#data", "#IPSyncPackets"]:
-                data = self.getProtocolData(protocol, filterCriteria, barGroups, column)
+            for columnFilter in [["in", "#interests"], ["out", "#data"], ["out","#IPSyncPackets"]]:
+                data = self.getProtocolData(protocol, filterCriteria, barGroups, columnFilter)
                 packetmeans.extend(data[0])
             means.append(packetmeans)
 
         print(means)
 
+        # define the starting position ( = position of first bar) for each bar group
+        # as well as the width and color for the bars
+        # if only one bar group is plotted, add a space of 0.1 between the bars
+        x_pos = numpy.arange(len(barGroups))
+        width = 0.25
+        space = 0
+        if (len(barGroups) == 1):
+            space = 0.1
+        colors = [(1, 1, 1, 1), (0.6, 0.6, 0.6, 1), (0.2, 0.2, 0.2, 1)]
+        figure, axis = plotter.subplots()
 
+        # define the bars for each protocol we want to represent in the different bar groups
+        quadTree_interests = self.getBar(axis, x_pos, means[0][0], width, 0, None, None, 10, colors[0], "black", "//")
+        quadTree_data = self.getBar(axis, x_pos, means[0][1], width, means[0][1], None, None, 10, colors[0], "black")
 
-    def getBar(self, axis, position, mean, width, error, errorcolor, capsize, color, edgecolor):
+        stateVector_interests = self.getBar(axis, x_pos + (width + space),means[1][0], width, 0, None, None, 10, colors[1], "black", "//")
+        stateVector_data = self.getBar(axis, x_pos + (width + space), means[1][1], width, means[1][0], None, None, 10, colors[1], "black")
+
+        zmq = self.getBar(axis, x_pos + 2 * (width + space), means[2][2], width, 0, None, None, 10, colors[2], "black")
+
+        # define the labels, legend and remove the ticks
+        if (len(barGroups) > 1):
+            self.removeTicks(showLabel=True)
+        else:
+            self.removeTicks(showLabel=False)
+        axis.set_xticks(x_pos + width)
+        axis.set_xticklabels(labels)
+        axis.set_xlabel("Setting: " + sublabel)
+
+        # set the labels according to the data we analyzed
+        axis.set_ylabel("Number of packets")
+        axis.set_title("Number of packets for three different protocols")
+
+        legendlabels = ["QuadTree Interests", "QuadTree Data", "StateVector Interests", "StateVector Data", "ZMQ outgoing IP-Packets"]
+        axis.legend((quadTree_interests[0], quadTree_data, stateVector_interests[0], stateVector_data[0], zmq[0]), legendlabels)
+
+        # show a grid along the y-axis and put it behind the bars
+        axis.set_axisbelow(True)
+        axis.yaxis.grid(True)
+
+        # prevent overlapping of elements and show the plot
+        plotter.tight_layout()
+        plotter.show()
+
+    def getBar(self, axis, position, mean, width, bottom, error, errorcolor, capsize, color, edgecolor, hatch=None):
         """
         return a bar, defined by the given parameters
         """
-        return axis.bar(position, mean, width, yerr=error, ecolor=errorcolor, capsize=capsize, color=color, edgecolor=edgecolor)
+        return axis.bar(position, mean, width, bottom = bottom, yerr=error, ecolor=errorcolor, capsize=capsize, color=color, edgecolor=edgecolor, hatch=hatch)
 
     def removeTicks(self, showLabel):
         """
@@ -238,7 +283,7 @@ if __name__ == "__main__":
 
     # visualize packets
     visualizer = Visualizer("packets")
-    visualizer.plotStackedBarChart(["16", "very-distributed"], ["cluster"], "printPackets")
+    visualizer.plotStackedBarChart(["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
 
     #visualize summary
     #visualizer = Visualizer("summary")

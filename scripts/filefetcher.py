@@ -35,7 +35,7 @@ class FileFetcher:
         elif self.data == "packets":
             filename = "network-stats.csv"
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
-                                        usecols=["#interests", "#data", "#IPSyncPackets"])
+                                        usecols=["in/out", "#interests", "#data", "#IPSyncPackets"])
             dataframe.name = fileDirectory + ".csv"
         else:
             filename = "summary.csv"
