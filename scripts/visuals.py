@@ -205,7 +205,7 @@ class Visualizer:
             packetmeans = []
             for columnFilter in [["out", "#data"], ["in", "#interests"], ["out","#IPSyncPackets"]]:
                 data = self.getProtocolData(protocol, filterCriteria, barGroups, columnFilter)
-                packetmeans.extend(data[0])
+                packetmeans.append(data[0])
             means.append(packetmeans)
 
         print(means)
@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
     # visualize packets
     visualizer = Visualizer("packets")
-    visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
+    visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
 
     #visualize summary
     #visualizer = Visualizer("summary")
