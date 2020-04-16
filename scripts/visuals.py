@@ -1,5 +1,6 @@
 import numpy
 import pandas
+import scipy.stats
 import matplotlib.pyplot as plotter
 from scripts.filefetcher import FileFetcher
 
@@ -67,24 +68,37 @@ class Visualizer:
             elif self.data == "packets" or self.data == "bytes":
                 # columnFilter[0] defines if we filter by 'in' or 'out'
                 # columnFilter[1] defines the column-name
-                frame = {columnFilter[1]:file[file['in/out'] == columnFilter[0]][columnFilter[1]]}
+                frame = file[file['in/out'] == columnFilter[0]]
                 #frame = {columnFilter[1]: file[columnFilter[1]]}
-                self.getValues(file.name, pandas.DataFrame(frame), [protocol, barGroup, run] + filterCriteria, values)
+                self.getValues(file.name, frame, [protocol, barGroup, run] + filterCriteria, values, columnFilter[1])
             else:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
 
         return numpy.mean(values)
 
-    def getValues(self, filename, dataframe, filterCriteria, values):
+    def getValues(self, filename, dataframe, filterCriteria, values, column_filter=None):
         """
         add the appropriate values of the filtered files
         to the values-list
         """
+
+        if column_filter == None:
+            column_filter = dataframe.columns[-1]
+
         if all(criterion in filename for criterion in filterCriteria):
-            for row in dataframe.values:
-                value = row[len(row)-1]
-                if value >= 0.0:
-                    values.append(float(value))
+            vector = dataframe[dataframe[column_filter] >= 0.0][column_filter].to_numpy()
+            values += vector.tolist()
+
+    def mean_confidence_interval(self, data, confidence=0.95):
+        """
+        Calculates the mean and the confidence interval for a given list of values
+        """
+
+        a = 1.0 * numpy.array(data)
+        n = len(a)
+        m, se = numpy.mean(a), scipy.stats.sem(a)
+        h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
+        return m, h
 
     def getProtocolData(self, protocol, filterCriteria, barGroups, columnFilter = None):
         """
@@ -111,8 +125,10 @@ class Visualizer:
 
             # get the mean + standard deviation of each bar group for the given protocol
             # by using the means per run for the calculation
-            means.append(numpy.mean(runmeans))
-            stds.append(numpy.std(runmeans))
+            print(runmeans)
+            mean_confidence = self.mean_confidence_interval(runmeans)
+            means.append(mean_confidence[0])
+            stds.append(mean_confidence[1])
 
             # print the calculated values for each bar group of the defined protocol
             # --> use the last element of the list
@@ -288,28 +304,34 @@ class Visualizer:
 if __name__ == "__main__":
 
     #visualize bytes
-    #figure, axis = plotter.subplots()
-    figure, axes = plotter.subplots(nrows=2, ncols=2)
-    figure.set_size_inches(20, 10)
-    #visualizer = Visualizer("bytes")
-    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"],"16 servers and high client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"],"4 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"],"4 servers and high client concentration")
+    # figure, axis = plotter.subplots()
+    # figure, axes = plotter.subplots(nrows=2, ncols=2)
+    # figure.set_size_inches(15, 7)
+    # visualizer = Visualizer("bytes")
+    # visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
+    # visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"],"16 servers and high client concentration")
+    # visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"],"4 servers and very low client concentration")
+    # visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"],"4 servers and high client concentration")
 
     # visualize packets
     #figure, axes = plotter.subplots(nrows=2, ncols=2)
-    visualizer = Visualizer("packets")
-    #visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
-    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
+    # visualizer = Visualizer("packets")
+    # visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
+    # visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
+    # visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
+    # visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
 
 
     #visualize summary
-    #visualizer = Visualizer("summary")
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
+    figure.set_size_inches(15, 7)
+    visualizer = Visualizer("summary")
+    visualizer.plotSimpleBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers, very distributed")
+    visualizer.plotSimpleBarChart(axes[0, 1], ["16", "distributed"], ["cluster", "continent"], "16 servers, distributed")
+    visualizer.plotSimpleBarChart(axes[0, 2], ["16", "concentrated"], ["cluster", "continent"], "16 servers, concentrated")
+    visualizer.plotSimpleBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers, very distributed")
+    visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"], "4 servers, distributed")
+    visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"], "4 servers, concentrated")
 
     #visualize in/out network-traffic
     #visualizer = Visualizer("network")
@@ -321,5 +343,5 @@ if __name__ == "__main__":
 
     # prevent overlapping of elements and show the plot
     plotter.tight_layout()
-    plotter.show()
-    #plotter.savefig("diag.pdf")
+    #plotter.show()
+    plotter.savefig("loss.pdf")
