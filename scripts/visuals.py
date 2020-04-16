@@ -64,7 +64,7 @@ class Visualizer:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
             elif self.data == "network":
                 self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
-            elif self.data == "packets":
+            elif self.data == "packets" or self.data == "bytes":
                 # columnFilter[0] defines if we filter by 'in' or 'out'
                 # columnFilter[1] defines the column-name
                 frame = {columnFilter[1]:file[file['in/out'] == columnFilter[0]][columnFilter[1]]}
@@ -105,7 +105,7 @@ class Visualizer:
 
             # calculate the means per run of each bar group for a certain protocol
             for i in range(self.runNumber):
-                if self.data == "packets":
+                if self.data == "packets" or self.data == "bytes":
                     mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i), columnFilter)
                     runmeans.append(mean)
                 else:
@@ -201,12 +201,17 @@ class Visualizer:
         for barGroup in barGroups:
             labels.append(barGroup.capitalize())
 
+        if self.data == "packets":
+            columnFilters = [["out", "#data"], ["in", "#interests"], ["out","#IPSyncPackets"]]
+        else:
+            columnFilters = [["out", "bytesData"], ["in", "bytesInterests"], ["out","bytesIPSyncPackets"]]
+
         for protocol in self.protocols:
-            packetmeans = []
-            for columnFilter in [["out", "#data"], ["in", "#interests"], ["out","#IPSyncPackets"]]:
+            columnmeans = []
+            for columnFilter in columnFilters:
                 data = self.getProtocolData(protocol, filterCriteria, barGroups, columnFilter)
-                packetmeans.append(data[0])
-            means.append(packetmeans)
+                columnmeans.append(data[0])
+            means.append(columnmeans)
 
         print(means)
 
@@ -240,8 +245,12 @@ class Visualizer:
         axis.set_xlabel("Setting: " + sublabel)
 
         # set the labels according to the data we analyzed
-        axis.set_ylabel("Number of packets")
-        axis.set_title("Number of packets for three different protocols")
+        if self.data == "packets":
+            axis.set_ylabel("Number of packets")
+            axis.set_title("Number of packets for three different protocols")
+        else:
+            axis.set_ylabel("Number of bytes")
+            axis.set_title("Number of bytes for three different protocols")
 
         legendlabels = ["QuadTree Interests", "QuadTree Data", "StateVector Interests", "StateVector Data", "ZMQ outgoing IP-Packets"]
         axis.legend((quadTree_interests[0], quadTree_data, stateVector_interests[0], stateVector_data[0], zmq[0]), legendlabels)
@@ -269,9 +278,13 @@ if __name__ == "__main__":
 
     figure, axis = plotter.subplots()
 
+    #visualize bytes
+    visualizer = Visualizer("bytes")
+    visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
+
     # visualize packets
-    visualizer = Visualizer("packets")
-    visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
+    #visualizer = Visualizer("packets")
+    #visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
 
     #visualize summary
     #visualizer = Visualizer("summary")
