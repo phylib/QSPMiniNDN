@@ -1,4 +1,5 @@
 import numpy
+import pandas
 import matplotlib.pyplot as plotter
 from scripts.filefetcher import FileFetcher
 
@@ -64,7 +65,8 @@ class Visualizer:
             elif self.data == "network":
                 self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
             elif self.data == "packets":
-                self.getValues(file.name, file[column], [protocol, barGroup, run] + filterCriteria, values)
+                frame = {column: file[column]}
+                self.getValues(file.name, pandas.DataFrame(frame), [protocol, barGroup, run] + filterCriteria, values)
             else:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
 
@@ -77,9 +79,10 @@ class Visualizer:
         """
         if all(criterion in filename for criterion in filterCriteria):
             for row in dataframe.values:
-                value = row[len(row) - 1]
+                value = row[len(row)-1]
                 if value >= 0.0:
                     values.append(float(value))
+
             print(filename)
 
 
@@ -189,6 +192,30 @@ class Visualizer:
         plotter.tight_layout()
         plotter.show()
 
+    def plotStackedBarChart(self, filterCriteria, barGroups, sublabel):
+        """
+        for plotting the stacked bar chart do not
+        use error bars --> standard deviation is not needed,
+        only the means
+        the means are stored in the form (p = protocol):
+        [[p_1(#interests), p_1(#data), p_1(#IPSyncPackets)], ...,[p_n(#interests), p_n(#data), p_n(#IPSyncPackets)]]
+        """
+        means = []
+        labels = []
+        for barGroup in barGroups:
+            labels.append(barGroup.capitalize())
+
+        for protocol in self.protocols:
+            packetmeans = []
+            for column in ["#interests", "#data", "#IPSyncPackets"]:
+                data = self.getProtocolData(protocol, filterCriteria, barGroups, column)
+                packetmeans.extend(data[0])
+            means.append(packetmeans)
+
+        print(means)
+
+
+
     def getBar(self, axis, position, mean, width, error, errorcolor, capsize, color, edgecolor):
         """
         return a bar, defined by the given parameters
@@ -209,9 +236,24 @@ class Visualizer:
 
 if __name__ == "__main__":
 
-    visualizer = Visualizer("summary")
+    # visualize packets
+    visualizer = Visualizer("packets")
+    visualizer.plotStackedBarChart(["16", "very-distributed"], ["cluster"], "printPackets")
+
+    #visualize summary
+    #visualizer = Visualizer("summary")
+    #visualizer.plotGroups(["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
+
+    #visualize in/out network-traffic
+    #visualizer = Visualizer("network")
+    #visualizer.plotGroups(["16", "very-distributed", "cluster"], ["in", "out"],"16 servers in a cluster and very low client concentration")
+
+    #visualize sync latencies
+    #visualizer = Visualizer("latencies")
+    #visualizer.plotGroups(["16", "very-distributed"], ["continent", "cluster"], "16 servers and very low client concentration")
+
     #visualizer.plotGroups(["16", "very-distributed", "cluster"], ["in", "out"], "16 servers in a cluster and very low client concentration")
-    visualizer.plotGroups(["16", "concentrated"], ["cluster"], "16 servers in a cluster and high client concentration")
+    #visualizer.plotGroups(["16", "concentrated"], ["cluster"], "16 servers in a cluster and high client concentration")
 
     #visualizer = Visualizer("latencies")
     #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
