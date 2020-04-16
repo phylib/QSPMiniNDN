@@ -187,6 +187,10 @@ class Visualizer:
 
         axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
 
+        # show a grid along the y-axis and put it behind the bars
+        axis.set_axisbelow(True)
+        axis.yaxis.grid(True)
+
 
     def plotStackedBarChart(self, axis, filterCriteria, barGroups, sublabel):
         """
@@ -255,6 +259,10 @@ class Visualizer:
         legendlabels = ["QuadTree Interests", "QuadTree Data", "StateVector Interests", "StateVector Data", "ZMQ outgoing IP-Packets"]
         axis.legend((quadTree_interests[0], quadTree_data, stateVector_interests[0], stateVector_data[0], zmq[0]), legendlabels)
 
+        # show a grid along the y-axis and put it behind the bars
+        axis.set_axisbelow(True)
+        axis.yaxis.grid(True)
+
 
     def getBar(self, axis, position, mean, width, bottom, error, errorcolor, capsize, color, edgecolor, hatch=None):
         """
@@ -276,15 +284,20 @@ class Visualizer:
 
 if __name__ == "__main__":
 
-    figure, axis = plotter.subplots()
-
     #visualize bytes
+    figure, axis = plotter.subplots()
     visualizer = Visualizer("bytes")
     visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
 
     # visualize packets
+    #figure, axes = plotter.subplots(nrows=2, ncols=2)
     #visualizer = Visualizer("packets")
     #visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
+    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
+    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
+    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
+    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
+
 
     #visualize summary
     #visualizer = Visualizer("summary")
@@ -298,10 +311,7 @@ if __name__ == "__main__":
     #visualizer = Visualizer("latencies")
     #visualizer.plotGroups(axis, ["16", "very-distributed"], ["continent", "cluster"], "16 servers and very low client concentration")
 
-    # show a grid along the y-axis and put it behind the bars
-    axis.set_axisbelow(True)
-    axis.yaxis.grid(True)
-
     # prevent overlapping of elements and show the plot
     plotter.tight_layout()
     plotter.show()
+    #plotter.savefig("diag.pdf")
