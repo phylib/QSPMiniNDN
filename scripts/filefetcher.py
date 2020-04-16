@@ -9,7 +9,7 @@ class FileFetcher:
         self.data = data
         if data == "latencies":
             self.csvDirectory = "../result-csv-files"
-        elif self.data == "network":
+        elif self.data == "network" or self.data == "packets":
             self.csvDirectory = "../2020-04-14_network-stats"
         else:
             self.csvDirectory = "../2020-04-08-all-summaries"
@@ -31,6 +31,11 @@ class FileFetcher:
             filename = "network-stats.csv"
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
                                         usecols=["in/out", "bytesSyncPayload"])
+            dataframe.name = fileDirectory + ".csv"
+        elif self.data == "packets":
+            filename = "network-stats.csv"
+            dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
+                                        usecols=["#interests", "#data", "#IPSyncPackets"])
             dataframe.name = fileDirectory + ".csv"
         else:
             filename = "summary.csv"

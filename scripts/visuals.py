@@ -39,7 +39,7 @@ class Visualizer:
                             self.files.append(file)
 
 
-    def getMeanPerRun(self, protocol, barGroup, filterCriteria, run):
+    def getMeanPerRun(self, protocol, barGroup, filterCriteria, run, column=None):
         """
         check for the files of a certain protocol
         and filter by the appropriate criteria depending on
@@ -60,28 +60,30 @@ class Visualizer:
         # whether we want analyze sync latencies, network data or summaries = default
         for file in self.files:
             if self.data == "latencies":
-                self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
+                self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
             elif self.data == "network":
-                self.getValues(file, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
+                self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
+            elif self.data == "packets":
+                self.getValues(file.name, file[column], [protocol, barGroup, run] + filterCriteria, values)
             else:
-                self.getValues(file, file, [protocol, barGroup, run] + filterCriteria, values)
+                self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
 
         return numpy.mean(values)
 
-    def getValues(self, file, dataframe, filterCriteria, values):
+    def getValues(self, filename, dataframe, filterCriteria, values):
         """
         add the appropriate values of the filtered files
         to the values-list
         """
-        if all(criterion in file.name for criterion in filterCriteria):
+        if all(criterion in filename for criterion in filterCriteria):
             for row in dataframe.values:
                 value = row[len(row) - 1]
                 if value >= 0.0:
                     values.append(float(value))
-            print(file.name)
+            print(filename)
 
 
-    def getProtocolData(self, protocol, filterCriteria, barGroups):
+    def getProtocolData(self, protocol, filterCriteria, barGroups, column = None):
         """
         return the means + standard deviations per bar group
         of a certain protocol
@@ -97,8 +99,12 @@ class Visualizer:
 
             # calculate the means per run of each bar group for a certain protocol
             for i in range(self.runNumber):
-                mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i))
-                runmeans.append(mean)
+                if self.data == "packets":
+                    mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i), column)
+                    runmeans.append(mean)
+                else:
+                    mean = self.getMeanPerRun(protocol, barGroup, filterCriteria, str(i))
+                    runmeans.append(mean)
 
             # get the mean + standard deviation of each bar group for the given protocol
             # by using the means per run for the calculation
@@ -205,7 +211,7 @@ if __name__ == "__main__":
 
     visualizer = Visualizer("summary")
     #visualizer.plotGroups(["16", "very-distributed", "cluster"], ["in", "out"], "16 servers in a cluster and very low client concentration")
-    visualizer.plotGroups(["16", "very-distributed"], ["cluster", "continent"], "16 servers in a cluster and very low client concentration")
+    visualizer.plotGroups(["16", "concentrated"], ["cluster"], "16 servers in a cluster and high client concentration")
 
     #visualizer = Visualizer("latencies")
     #visualizer.plotGroups(["16", "concentrated"], ["continent", "cluster"], "16 servers and high client concentration")
