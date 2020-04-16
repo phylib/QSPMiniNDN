@@ -86,9 +86,6 @@ class Visualizer:
                 if value >= 0.0:
                     values.append(float(value))
 
-            print(filename)
-
-
     def getProtocolData(self, protocol, filterCriteria, barGroups, columnFilter = None):
         """
         return the means + standard deviations per bar group
@@ -127,7 +124,7 @@ class Visualizer:
 
 
 
-    def plotGroups(self, axis, filterCriteria, barGroups, sublabel):
+    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, sublabel):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -206,13 +203,19 @@ class Visualizer:
             labels.append(barGroup.capitalize())
 
         if self.data == "packets":
-            columnFilters = [["out", "#data"], ["in", "#interests"], ["out","#IPSyncPackets"]]
+            columnFilters = {
+                'QuadTree': [["out", "#data"], ["in", "#interests"]],
+                'StateVector': [["out", "#data"], ["in", "#interests"]],
+                'ZMQ': [["out", "#IPSyncPackets"]]}
         else:
-            columnFilters = [["out", "bytesData"], ["in", "bytesInterests"], ["out","bytesIPSyncPackets"]]
+            columnFilters = {
+                'QuadTree': [["out", "bytesData"], ["in", "bytesInterests"]],
+                'StateVector': [["out", "bytesData"], ["in", "bytesInterests"]],
+                'ZMQ': [["out", "bytesIPSyncPackets"]]}
 
         for protocol in self.protocols:
             columnmeans = []
-            for columnFilter in columnFilters:
+            for columnFilter in columnFilters[protocol]:
                 data = self.getProtocolData(protocol, filterCriteria, barGroups, columnFilter)
                 columnmeans.append(data[0])
             means.append(columnmeans)
@@ -237,7 +240,7 @@ class Visualizer:
         stateVector_interests = self.getBar(axis, x_pos + (width + space),means[1][1], width, means[1][0], None, None, 10, colors[1], "black", "//")
 
 
-        zmq = self.getBar(axis, x_pos + 2 * (width + space), means[2][2], width, 0, None, None, 10, colors[2], "black")
+        zmq = self.getBar(axis, x_pos + 2 * (width + space), means[2][0], width, 0, None, None, 10, colors[2], "black")
 
         # define the labels, legend and remove the ticks
         if (len(barGroups) > 1):
@@ -285,31 +288,36 @@ class Visualizer:
 if __name__ == "__main__":
 
     #visualize bytes
-    figure, axis = plotter.subplots()
-    visualizer = Visualizer("bytes")
-    visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
+    #figure, axis = plotter.subplots()
+    figure, axes = plotter.subplots(nrows=2, ncols=2)
+    figure.set_size_inches(20, 10)
+    #visualizer = Visualizer("bytes")
+    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
+    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"],"16 servers and high client concentration")
+    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"],"4 servers and very low client concentration")
+    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"],"4 servers and high client concentration")
 
     # visualize packets
     #figure, axes = plotter.subplots(nrows=2, ncols=2)
-    #visualizer = Visualizer("packets")
+    visualizer = Visualizer("packets")
     #visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
+    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
+    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
+    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
 
 
     #visualize summary
     #visualizer = Visualizer("summary")
-    #visualizer.plotGroups(axis, ["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
 
     #visualize in/out network-traffic
     #visualizer = Visualizer("network")
-    #visualizer.plotGroups(axis, ["16", "very-distributed", "cluster"], ["in", "out"],"16 servers in a cluster and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"],"16 servers in a cluster and very low client concentration")
 
     #visualize sync latencies
     #visualizer = Visualizer("latencies")
-    #visualizer.plotGroups(axis, ["16", "very-distributed"], ["continent", "cluster"], "16 servers and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"], "16 servers and very low client concentration")
 
     # prevent overlapping of elements and show the plot
     plotter.tight_layout()
