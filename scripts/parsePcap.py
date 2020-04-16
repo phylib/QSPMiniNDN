@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
     # find pcap files that have to be processed, create output/log files for runs in output dir
     for subfolder in get_immediate_subdirectories(input):
-        if "_QuadTree_run" in subfolder or "_StateVector_run" in subfolder or "_ZMQ_run" in subfolder:
+        if "_QuadTree_run" in subfolder or "_StateVector_run" in subfolder or "_ZMQ_run" in subfolder or "_P2P_run" in subfolder:
             parse_directory(subfolder, os.path.join(input, subfolder))
         else:
             print("skipping directory: " + os.path.join(input, subfolder))
