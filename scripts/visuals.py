@@ -210,7 +210,7 @@ class Visualizer:
 
         for protocol in self.protocols:
             packetmeans = []
-            for columnFilter in [["in", "#interests"], ["out", "#data"], ["out","#IPSyncPackets"]]:
+            for columnFilter in [["out", "#data"], ["in", "#interests"], ["out","#IPSyncPackets"]]:
                 data = self.getProtocolData(protocol, filterCriteria, barGroups, columnFilter)
                 packetmeans.extend(data[0])
             means.append(packetmeans)
@@ -229,11 +229,12 @@ class Visualizer:
         figure, axis = plotter.subplots()
 
         # define the bars for each protocol we want to represent in the different bar groups
-        quadTree_interests = self.getBar(axis, x_pos, means[0][0], width, 0, None, None, 10, colors[0], "black", "//")
-        quadTree_data = self.getBar(axis, x_pos, means[0][1], width, means[0][1], None, None, 10, colors[0], "black")
+        quadTree_data = self.getBar(axis, x_pos, means[0][0], width, 0, None, None, 10, colors[0], "black")
+        quadTree_interests = self.getBar(axis, x_pos, means[0][1], width, means[0][0], None, None, 10, colors[0], "black", "//")
 
-        stateVector_interests = self.getBar(axis, x_pos + (width + space),means[1][0], width, 0, None, None, 10, colors[1], "black", "//")
-        stateVector_data = self.getBar(axis, x_pos + (width + space), means[1][1], width, means[1][0], None, None, 10, colors[1], "black")
+        stateVector_data = self.getBar(axis, x_pos + (width + space), means[1][0], width, 0, None, None, 10, colors[1], "black")
+        stateVector_interests = self.getBar(axis, x_pos + (width + space),means[1][1], width, means[1][0], None, None, 10, colors[1], "black", "//")
+
 
         zmq = self.getBar(axis, x_pos + 2 * (width + space), means[2][2], width, 0, None, None, 10, colors[2], "black")
 
