@@ -147,8 +147,8 @@ if __name__ == '__main__':
                 grh.addOrigin([server[0]], [server[5]])
             elif protocol == 'StateVector':
                 # Register requrired prefixes
-                grh.addOrigin([server[0]], "/ndn/svs/syncNotify")
-                grh.addOrigin([server[0]], "/ndn/svs/vsyncData")
+                grh.addOrigin([server[0]], ["/ndn/svs/syncNotify"])
+                grh.addOrigin([server[0]], ["/ndn/svs/vsyncData"])
             elif protocol == 'P2P':
                 nameComponents = server[5].split("/")
                 names = ['/'.join(nameComponents[:i]) for i in range(3, len(nameComponents) + 1)]
