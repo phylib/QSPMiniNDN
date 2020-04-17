@@ -2,34 +2,35 @@ import os
 import argparse
 
 
-def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", workDir="/tmp/minindn/"):
+def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", workDir="/tmp/minindn/",
+            calcPcap=False):
     num_servers = [
-        #4,
-        #16,
+        # 4,
+        # 16,
         64
     ]
     runs = [
         0,
         1,
         2,
-        #3,
-        #4,
-        #5
+        # 3,
+        # 4,
+        # 5
     ]
     protocols = [
-        #"QuadTree",
-        #"StateVector",
-        #"ZMQ",
+        # "QuadTree",
+        # "StateVector",
+        # "ZMQ",
         "P2P"
     ]
 
     types = [
-        #"continent",
+        # "continent",
         "cluster"
     ]
     traceFiles = [
-        #"ChunkChanges-concentrated.csv",
-        #"ChunkChanges-distributed.csv",
+        # "ChunkChanges-concentrated.csv",
+        # "ChunkChanges-distributed.csv",
         "ChunkChanges-very-distributed.csv",
     ]
 
@@ -92,6 +93,8 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", 
                         print("")
 
     os.system("sudo chown -R ubuntu:ubuntu " + result_dir)
+    if calcPcap:
+        os.system("python3 scripts/parsePcap.py --result-dir {}".format(results_folder))
     # os.system(
     #     "source ~/analysis/bin/activate && python3 ~/mc/mc-server-sync/statistics/trafficAnalysis/parsePCAP.py -i " + result_dir + " -o " + result_dir)
 
@@ -101,12 +104,15 @@ if __name__ == "__main__":
     parser.add_argument('--result-dir', dest='resultDir', default="/tmp/")
     parser.add_argument('--src-dir', dest='srcDir', default=None)
     parser.add_argument('--work-dir', dest='workDir', default="/tmp/minindn/")
+    parser.add_argument('--calc-pcap', action='store_true',
+                        help="Recalculate all pcap stats after the evaluation finished")
 
     args = parser.parse_args()
     resultDir = args.resultDir
     srcDir = args.srcDir
     workDir = args.workDir
+    calcPcap = args.calcPcap
     if srcDir is None:
         srcDir = os.getcwd() + "/QuadTreeSyncEvaluation/"
 
-    execute(result_dir=resultDir, srcDir=srcDir, workDir=workDir)
+    execute(result_dir=resultDir, srcDir=srcDir, workDir=workDir, calcPcap=calcPcap)
