@@ -6,16 +6,16 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", 
             calcPcap=False):
     num_servers = [
         # 4,
-        # 16,
-        64
+        16,
+        # 64
     ]
     runs = [
         0,
         1,
         2,
-        # 3,
-        # 4,
-        # 5
+        3,
+        4,
+        5
     ]
     protocols = [
         # "QuadTree",
@@ -29,8 +29,8 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", 
         "cluster"
     ]
     traceFiles = [
-        # "ChunkChanges-concentrated.csv",
-        # "ChunkChanges-distributed.csv",
+        "ChunkChanges-concentrated.csv",
+        "ChunkChanges-distributed.csv",
         "ChunkChanges-very-distributed.csv",
     ]
 
