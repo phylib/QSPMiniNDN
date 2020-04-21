@@ -124,7 +124,7 @@ class Visualizer:
 
 
 
-    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, sublabel):
+    def plotSimpleBarChart(self, axis, filterCriteria, barGroups):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -138,6 +138,7 @@ class Visualizer:
         labels = []
         for barGroup in barGroups:
             labels.append(barGroup.capitalize())
+        sublabel = self.buildLabel(filterCriteria)
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -189,7 +190,7 @@ class Visualizer:
         axis.yaxis.grid(True)
 
 
-    def plotStackedBarChart(self, axis, filterCriteria, barGroups, sublabel):
+    def plotStackedBarChart(self, axis, filterCriteria, barGroups):
         """
         for plotting the stacked bar chart do not
         use error bars --> standard deviation is not needed,
@@ -201,6 +202,7 @@ class Visualizer:
         labels = []
         for barGroup in barGroups:
             labels.append(barGroup.capitalize())
+        sublabel = self.buildLabel(filterCriteria)
 
         if self.data == "packets":
             columnFilters = {
@@ -285,41 +287,87 @@ class Visualizer:
             labelbottom=showLabel)
 
 
+    def buildLabel(self, filterCriteria):
+        """
+        build the label under the x_axis based on
+        the passed filterCriteria
+        """
+        label = ""
+
+        # put all criteria in the label somehow
+        for i in range(len(filterCriteria)):
+            criterion = filterCriteria[i]
+
+            # if it is a number, it stands for the number of servers
+            if criterion.isnumeric() and int(criterion) in self.serverNumbers:
+                label += "%s servers" %criterion
+
+            # define the concentration level of clients
+            elif criterion in self.clientConcentrations:
+                if(criterion == "concentrated"):
+                    concentrationLevel = "high"
+                elif(criterion == "distributed"):
+                    concentrationLevel = "low"
+                else:
+                    concentrationLevel = "very low"
+                label += "%s client concentration" %concentrationLevel
+
+            # if the criterion is a topology do not put a space in front of
+            # it, if it is the first criterion used in the label
+            elif criterion in self.topologies:
+                if i > 0:
+                    label += " "
+                label += "in a %s" %criterion
+
+            # if the current criterion is not the last one --> add 'and' to label
+            # do not add 'and' if the current criterion is the first one
+            # and it is also a topology, use 'with' instead
+            # example: "cluster with 16 servers.....", instead of "cluster and 16 servers...."
+            if i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
+                    and not(criterion in self.topologies and i == 0):
+                label += " and "
+            elif i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
+                    and (criterion in self.topologies and i == 0):
+                label += " with "
+
+        return label
+
 if __name__ == "__main__":
 
-    #visualize bytes
-    #figure, axis = plotter.subplots()
+    figure, axis = plotter.subplots()
     figure, axes = plotter.subplots(nrows=2, ncols=2)
     figure.set_size_inches(20, 10)
+
+    # visualize bytes
     #visualizer = Visualizer("bytes")
-    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"],"16 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"],"16 servers and high client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"],"4 servers and very low client concentration")
-    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"],"4 servers and high client concentration")
+    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
+    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
+    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
+    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
 
     # visualize packets
-    #figure, axes = plotter.subplots(nrows=2, ncols=2)
     visualizer = Visualizer("packets")
-    #visualizer.plotStackedBarChart(axis, ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"], "16 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"], "16 servers and high client concentration")
-    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"], "4 servers and very low client concentration")
-    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"], "4 servers and high client concentration")
+    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
 
 
     #visualize summary
     #visualizer = Visualizer("summary")
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["cluster"], "16 servers in a cluster and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["cluster"])
 
     #visualize in/out network-traffic
     #visualizer = Visualizer("network")
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"],"16 servers in a cluster and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
 
     #visualize sync latencies
     #visualizer = Visualizer("latencies")
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"], "16 servers and very low client concentration")
+    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
 
     # prevent overlapping of elements and show the plot
     plotter.tight_layout()
     plotter.show()
     #plotter.savefig("diag.pdf")
+
+
