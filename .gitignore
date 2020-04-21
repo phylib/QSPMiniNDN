@@ -6,10 +6,8 @@ Mini_NDN.egg-info
 
 # Added by Selina
 venv
-result-csv-files
-sample-pcap-files
-2020-04-14_network-stats
-2020-04-08-all-summaries
+result-csv-files_3runs
+result-csv-files_6runs
 
 # Docs
 docs/html

@@ -1,18 +1,16 @@
 import pandas
 
 class FileFetcher:
-    def __init__(self, data):
+    def __init__(self, data, directory):
         """
         Assign the directory in which the necessary
         files are contained
         """
         self.data = data
         if data == "latencies":
-            self.csvDirectory = "../result-csv-files"
-        elif self.data == "network" or self.data == "packets" or self.data == "bytes":
-            self.csvDirectory = "../2020-04-14_network-stats"
+            self.csvDirectory = "../result-csv-files_3runs"
         else:
-            self.csvDirectory = "../2020-04-08-all-summaries"
+            self.csvDirectory = directory
 
     def getCSVFile(self, numServers, topology, protocol, runNumber, clientConcentration):
         """

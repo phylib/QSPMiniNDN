@@ -6,14 +6,14 @@ from scripts.filefetcher import FileFetcher
 
 class Visualizer:
 
-    def __init__(self, data):
+    def __init__(self, data, directory):
         """
         define the values of all possible filter criteria
         and assign a FileFetcher instance for
         getting the necessary data
         """
         self.data = data
-        self.fileFetcher = FileFetcher(data)
+        self.fileFetcher = FileFetcher(data, directory)
         self.runNumber = 3
         self.serverNumbers = [4, 16]
         self.topologies = ["cluster", "continent"]
@@ -350,28 +350,29 @@ class Visualizer:
 
 if __name__ == "__main__":
 
+    csvDirectory = "../result-csv-files_6runs"
     # visualize packets
-    #visualizer = Visualizer("packets")
-    #figure, axes = plotter.subplots(nrows=2, ncols=2)
-    #figure.set_size_inches(15, 7)
-    #visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
-    #visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
-    #visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
-    #visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    '''visualizer = Visualizer("packets", csvDirectory)
+    figure, axes = plotter.subplots(nrows=2, ncols=2)
+    figure.set_size_inches(15, 7)
+    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])'''
 
 
     #visualize bytes
-    # visualizer = Visualizer("bytes")
-    # figure, axes = plotter.subplots(nrows=2, ncols=2)
-    # figure.set_size_inches(15, 7)
-    # visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
-    # visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
-    # visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
-    # visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    '''visualizer = Visualizer("bytes", csvDirectory)
+    figure, axes = plotter.subplots(nrows=2, ncols=2)
+    figure.set_size_inches(15, 7)
+    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])'''
 
 
     #visualize summary
-    visualizer = Visualizer("summary")
+    visualizer = Visualizer("summary", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 7)
     visualizer.plotSimpleBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
@@ -383,14 +384,14 @@ if __name__ == "__main__":
 
 
     #visualize in/out network-traffic
-    #visualizer = Visualizer("network")
-    #figure, axis = plotter.subplots()
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
+    '''visualizer = Visualizer("network", csvDirectory)
+    figure, axis = plotter.subplots()
+    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])'''
 
     #visualize sync latencies
-    #visualizer = Visualizer("latencies")
-    #figure, axis = plotter.subplots()
-    #visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
+    '''visualizer = Visualizer("latencies", csvDirectory)
+    figure, axis = plotter.subplots()
+    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])'''
 
     # prevent overlapping of elements and show the plot
     plotter.tight_layout()
