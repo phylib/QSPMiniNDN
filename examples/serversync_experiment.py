@@ -182,7 +182,7 @@ if __name__ == '__main__':
                        traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "ZMQ":
             otherPeers = [(remote[0].intfs[0].ip, 5000 + remote[7]) for remote in servers if
-                          remote[0].name != server[0].name]
+                          remote[7] != server[7]]
             AppManager(ndn, [server[0]], ZMQGameServer, responsibility=server[6], logFolder=logDir,
                        serverPort=(5000 + server[7]), otherPeers=otherPeers, clientId=server[7], traceFile=traceFile,
                        srcDir=srcDir + "/ZMQSyncPeer")
