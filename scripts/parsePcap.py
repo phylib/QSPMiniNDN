@@ -150,6 +150,12 @@ def parse_pcap_file(pcap_file, output_csv):
 def parse_directory(directory, fullPath):
     # write header to output file (overwrite existing)
     output_file_path = os.path.join(fullPath, "network-stats.csv")
+
+    # If the output file already exists, skip the directory
+    if os.path.isfile(output_file_path):
+        print("PCAP already parsed, skipping directory {}".format(directory))
+        return
+
     with open(output_file_path, "w") as output_file:
         output_file.write(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("node", "in/out", "#interests",
