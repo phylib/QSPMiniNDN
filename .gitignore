@@ -8,6 +8,7 @@ Mini_NDN.egg-info
 venv
 result-csv-files_3runs
 result-csv-files_6runs
+plot-results
 
 # Docs
 docs/html

@@ -6,7 +6,7 @@ from scripts.filefetcher import FileFetcher
 
 class Visualizer:
 
-    def __init__(self, data, directory):
+    def __init__(self, data, directory, compareP2P = False):
         """
         define the values of all possible filter criteria
         and assign a FileFetcher instance for
@@ -14,19 +14,25 @@ class Visualizer:
         """
         self.data = data
         self.fileFetcher = FileFetcher(data, directory)
-        self.runNumber = 3
-        self.serverNumbers = [4, 16]
-        self.topologies = ["cluster", "continent"]
-        self.protocols = ["QuadTree", "StateVector", "ZMQ"]
-        self.clientConcentrations = ["concentrated", "very-distributed"]
-
-        # for analyzing sync latencies there are less
-        # files to get data from
-        if not(data == "latencies"):
-            self.runNumber = 6
-            self.clientConcentrations.append("distributed")
+        self.compareP2P = compareP2P
+        if not(compareP2P) and self.data == "latencies":
+            self.setSettings(3, [4, 16], ["cluster", "continent"],
+                             ["QuadTree", "StateVector", "ZMQ"], ["concentrated", "very-distributed"])
+        elif not(compareP2P):
+            self.setSettings(6, [4, 16], ["cluster", "continent"], ["QuadTree", "StateVector", "ZMQ"],
+                             ["concentrated", "very-distributed", "distributed"])
+        elif compareP2P:
+            self.setSettings(6, [16], ["cluster"], ["QuadTree", "P2P"],
+                             ["concentrated", "very-distributed", "distributed"])
         self.files = []
         self.fetchAllFiles()
+
+    def setSettings(self, runNumber, serverNumbers, topologies, protocols, clientConcentrations):
+        self.runNumber = runNumber
+        self.serverNumbers = serverNumbers
+        self.topologies = topologies
+        self.protocols = protocols
+        self.clientConcentrations = clientConcentrations
 
     def fetchAllFiles(self):
         """
@@ -175,9 +181,12 @@ class Visualizer:
 
 
         # define the bars for each protocol we want to represent in the different bar groups
-        quadTree = self.getBar(axis, x_pos, means[0], width, None, stds[0], "black", 10, colors[0], "black")
-        stateVector = self.getBar(axis, x_pos + (width+space), means[1], width, None, stds[1], "black", 10, colors[1], "black")
-        zmq = self.getBar(axis, x_pos + 2 * (width+space), means[2], width, None, stds[2], "black", 10, colors[2], "black")
+        bars = []
+        legend = []
+        for i in range(len(self.protocols)):
+            bar = self.getBar(axis, x_pos + i * (width+space), means[i], width, None, stds[i], "black", 10, colors[i], "black")
+            bars.append(bar)
+            legend.append(bar[0])
 
         # define the labels, legend and remove the ticks
         if(len(barGroups)>1):
@@ -191,15 +200,15 @@ class Visualizer:
         # set the labels according to the data we analyzed
         if(self.data == 'latencies'):
             axis.set_ylabel("Sync Latencies")
-            axis.set_title("Sync Latencies of three different protocols")
+            axis.set_title("Sync Latencies of %d different protocols" %len(self.protocols))
         elif(self.data == "network"):
             axis.set_ylabel("Bytes of Sync Payload")
-            axis.set_title("Bytes of Sync Payload of three different protocols")
+            axis.set_title("Bytes of Sync Payload of %d different protocols" %len(self.protocols))
         else:
             axis.set_ylabel("Lost Data")
-            axis.set_title("Lost Data of three different protocols")
+            axis.set_title("Lost Data of %d different protocols" %len(self.protocols))
 
-        axis.legend((quadTree[0], stateVector[0], zmq[0]), self.protocols)
+        axis.legend(legend, self.protocols)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -223,11 +232,13 @@ class Visualizer:
         if self.data == "packets":
             columnFilters = {
                 'QuadTree': [["out", "#data"], ["in", "#interests"]],
+                'P2P': [["out", "#data"], ["in", "#interests"]],
                 'StateVector': [["out", "#data"], ["in", "#interests"]],
                 'ZMQ': [["out", "#IPSyncPackets"]]}
         else:
             columnFilters = {
                 'QuadTree': [["out", "bytesData"], ["in", "bytesInterests"]],
+                'P2P': [["out", "bytesData"], ["in", "bytesInterests"]],
                 'StateVector': [["out", "bytesData"], ["in", "bytesInterests"]],
                 'ZMQ': [["out", "bytesIPSyncPackets"]]}
 
@@ -251,14 +262,22 @@ class Visualizer:
         colors = [(1, 1, 1, 1), (0.6, 0.6, 0.6, 1), (0.2, 0.2, 0.2, 1)]
 
         # define the bars for each protocol we want to represent in the different bar groups
-        quadTree_data = self.getBar(axis, x_pos, means[0][0], width, 0, None, None, 10, colors[0], "black")
-        quadTree_interests = self.getBar(axis, x_pos, means[0][1], width, means[0][0], None, None, 10, colors[0], "black", "//")
-
-        stateVector_data = self.getBar(axis, x_pos + (width + space), means[1][0], width, 0, None, None, 10, colors[1], "black")
-        stateVector_interests = self.getBar(axis, x_pos + (width + space),means[1][1], width, means[1][0], None, None, 10, colors[1], "black", "//")
-
-
-        zmq = self.getBar(axis, x_pos + 2 * (width + space), means[2][0], width, 0, None, None, 10, colors[2], "black")
+        bars = []
+        legend = []
+        legendlabels = []
+        i = 0
+        for protocol in self.protocols:
+            for j in range(len(columnFilters[protocol])):
+                if(j > 0):
+                    bar = self.getBar(axis, x_pos + i*(width + space), means[i][j], width, means[i][j-1],
+                                      None, None, 10, colors[i], "black", "//")
+                else:
+                    bar = self.getBar(axis, x_pos + i * (width + space), means[i][j], width, 0, None,
+                                      None, 10, colors[i], "black", )
+                bars.append(bar)
+                legend.append(bar[0])
+                legendlabels.append("%s %s" %(protocol.capitalize(), columnFilters[protocol][j][1]))
+            i += 1
 
         # define the labels, legend and remove the ticks
         if (len(barGroups) > 1):
@@ -272,13 +291,13 @@ class Visualizer:
         # set the labels according to the data we analyzed
         if self.data == "packets":
             axis.set_ylabel("Number of packets")
-            axis.set_title("Number of packets for three different protocols")
+            axis.set_title("Number of packets for %d different protocols" %len(self.protocols))
         else:
             axis.set_ylabel("Number of bytes")
-            axis.set_title("Number of bytes for three different protocols")
+            axis.set_title("Number of bytes for %d different protocols" %len(self.protocols))
 
-        legendlabels = ["QuadTree Interests", "QuadTree Data", "StateVector Interests", "StateVector Data", "ZMQ outgoing IP-Packets"]
-        axis.legend((quadTree_interests[0], quadTree_data, stateVector_interests[0], stateVector_data[0], zmq[0]), legendlabels)
+
+        axis.legend(legend, legendlabels)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -352,23 +371,27 @@ if __name__ == "__main__":
 
     csvDirectory = "../result-csv-files_6runs"
     # visualize packets
-    '''visualizer = Visualizer("packets", csvDirectory)
+    visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
     figure.set_size_inches(15, 7)
     visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])'''
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/allProtocols_packets.pdf")
 
 
     #visualize bytes
-    '''visualizer = Visualizer("bytes", csvDirectory)
+    visualizer = Visualizer("bytes", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
     figure.set_size_inches(15, 7)
     visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])'''
+    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/allProtocols_bytes.pdf")
 
 
     #visualize summary
@@ -381,21 +404,66 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"])
-
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/allProtocols_loss.pdf")
 
     #visualize in/out network-traffic
-    '''visualizer = Visualizer("network", csvDirectory)
+    visualizer = Visualizer("network", csvDirectory)
     figure, axis = plotter.subplots()
-    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])'''
+    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/allProtocols_network_in_out.pdf")
 
     #visualize sync latencies
-    '''visualizer = Visualizer("latencies", csvDirectory)
+    visualizer = Visualizer("latencies", csvDirectory)
     figure, axis = plotter.subplots()
-    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])'''
+    visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/allProtocols_latencies.pdf")
+
+    # visualize summary: P2P vs. QuadTree
+    visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=3, ncols=1)
+    figure.set_size_inches(7, 15)
+    visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"])
+    visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/p2p_loss.pdf")
+
+    # visualize network traffic in/out: P2P vs. QuadTree
+    visualizer = Visualizer("network", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=3, ncols=1)
+    figure.set_size_inches(7, 15)
+    visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed", "cluster"], ["in", "out"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "distributed", "cluster"], ["in", "out"])
+    visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated", "cluster"], ["in", "out"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/p2p_network_in_out.pdf")
+
+    # visualize summary: P2P vs. QuadTree
+    visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=3, ncols=1)
+    figure.set_size_inches(7, 15)
+    visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/p2p_packets.pdf")
+
+    # visualize summary: P2P vs. QuadTree
+    visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=3, ncols=1)
+    figure.set_size_inches(7, 15)
+    visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    plotter.tight_layout()
+    plotter.savefig("../plot-results/p2p_bytes.pdf")
 
     # prevent overlapping of elements and show the plot
-    plotter.tight_layout()
+    #plotter.tight_layout()
 
-    plotter.show()
+    #plotter.show()
     #plotter.savefig("loss.pdf")
 
