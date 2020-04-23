@@ -15,6 +15,7 @@ class Visualizer:
         self.data = data
         self.fileFetcher = FileFetcher(data, directory)
         self.compareP2P = compareP2P
+
         if not(compareP2P) and self.data == "latencies":
             self.setSettings(3, [4, 16], ["cluster", "continent"],
                              ["QuadTree", "StateVector", "ZMQ"], ["concentrated", "very-distributed"])
@@ -26,6 +27,7 @@ class Visualizer:
                              ["concentrated", "very-distributed", "distributed"])
         self.files = []
         self.fetchAllFiles()
+        self.transformationFactor = self.getTransformationFactor()
 
     def setSettings(self, runNumber, serverNumbers, topologies, protocols, clientConcentrations):
         self.runNumber = runNumber
@@ -33,6 +35,12 @@ class Visualizer:
         self.topologies = topologies
         self.protocols = protocols
         self.clientConcentrations = clientConcentrations
+
+    def getTransformationFactor(self):
+        if(self.data == "bytes" or self.data == "network"):
+            return 1000*1000
+        else:
+            return 1000
 
     def fetchAllFiles(self):
         """
@@ -80,7 +88,7 @@ class Visualizer:
             else:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
 
-        return numpy.mean(values)
+        return numpy.mean(values)/self.transformationFactor
 
     def getValues(self, filename, dataframe, filterCriteria, values, column_filter=None):
         """
@@ -204,16 +212,22 @@ class Visualizer:
 
         # set the labels according to the data we analyzed
         if(self.data == 'latencies'):
-            axis.set_ylabel("Sync Latencies")
+            ylabel = "Sync Latencies"
             axis.set_title("Sync Latencies of %d different protocols" %len(self.protocols))
         elif(self.data == "network"):
-            axis.set_ylabel("Bytes of Sync Payload")
+            ylabel = "Bytes of Sync Payload"
             axis.set_title("Bytes of Sync Payload of %d different protocols" %len(self.protocols))
         else:
-            axis.set_ylabel("Lost Data")
+            ylabel = "Lost Data"
             axis.set_title("Lost Data of %d different protocols" %len(self.protocols))
 
         axis.legend(legend, self.protocols)
+        if(self.transformationFactor == 1000):
+            ylabel += (" [k]")
+        else:
+            ylabel += (" [MB]")
+        axis.set_ylabel(ylabel)
+        axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -300,12 +314,18 @@ class Visualizer:
 
         # set the labels according to the data we analyzed
         if self.data == "packets":
-            axis.set_ylabel("Number of packets")
+            ylabel = "Number of packets"
             axis.set_title("Number of packets for %d different protocols" %len(self.protocols))
         else:
-            axis.set_ylabel("Number of bytes")
+            ylabel = "Number of bytes"
             axis.set_title("Number of bytes for %d different protocols" %len(self.protocols))
 
+        if (self.transformationFactor == 1000):
+            ylabel += (" [k]")
+        else:
+            ylabel += (" [MB]")
+        axis.set_ylabel(ylabel)
+        axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
 
         axis.legend(legend, legendlabels)
 
