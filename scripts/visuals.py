@@ -160,7 +160,11 @@ class Visualizer:
         labels = []
         for barGroup in barGroups:
             labels.append(barGroup.capitalize())
-        sublabel = self.buildLabel(filterCriteria)
+
+        if(len(barGroups) <= 1):
+            sublabel = self.buildLabel(filterCriteria + barGroups)
+        else:
+            sublabel = self.buildLabel(filterCriteria)
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -189,13 +193,14 @@ class Visualizer:
             legend.append(bar[0])
 
         # define the labels, legend and remove the ticks
-        if(len(barGroups)>1):
-            self.removeTicks(showLabel=True)
-        else:
-            self.removeTicks(showLabel=False)
-        axis.set_xticks(x_pos + width)
+        axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
         axis.set_xlabel("Setting: " + sublabel)
+
+        if (len(barGroups) > 1):
+            self.removeTicks(axis, showLabel=True)
+        else:
+            self.removeTicks(axis, showLabel=False)
 
         # set the labels according to the data we analyzed
         if(self.data == 'latencies'):
@@ -227,7 +232,11 @@ class Visualizer:
         labels = []
         for barGroup in barGroups:
             labels.append(barGroup.capitalize())
-        sublabel = self.buildLabel(filterCriteria)
+
+        if (len(barGroups) <= 1):
+            sublabel = self.buildLabel(filterCriteria + barGroups)
+        else:
+            sublabel = self.buildLabel(filterCriteria)
 
         if self.data == "packets":
             columnFilters = {
@@ -276,17 +285,18 @@ class Visualizer:
                                       None, 10, colors[i], "black", )
                 bars.append(bar)
                 legend.append(bar[0])
-                legendlabels.append("%s %s" %(protocol.capitalize(), columnFilters[protocol][j][1]))
+                legendlabels.append("%s %s" %(protocol, columnFilters[protocol][j][1]))
             i += 1
 
         # define the labels, legend and remove the ticks
-        if (len(barGroups) > 1):
-            self.removeTicks(showLabel=True)
-        else:
-            self.removeTicks(showLabel=False)
-        axis.set_xticks(x_pos + width)
+        axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
         axis.set_xlabel("Setting: " + sublabel)
+
+        if (len(barGroups) > 1):
+            self.removeTicks(axis, showLabel=True)
+        else:
+            self.removeTicks(axis, showLabel=False)
 
         # set the labels according to the data we analyzed
         if self.data == "packets":
@@ -310,11 +320,11 @@ class Visualizer:
         """
         return axis.bar(position, mean, width, bottom = bottom, yerr=error, ecolor=errorcolor, capsize=capsize, color=color, edgecolor=edgecolor, hatch=hatch)
 
-    def removeTicks(self, showLabel):
+    def removeTicks(self, axis, showLabel):
         """
         remove the ticks along the x-axis, and show a label if necessary
         """
-        plotter.tick_params(
+        axis.tick_params(
             axis='x',      # changes apply to the x-axis
             which='both',  # both major and minor ticks are affected
             bottom=False,  # ticks along the bottom edge are off
