@@ -111,7 +111,7 @@ if __name__ == "__main__":
     resultDir = args.resultDir
     srcDir = args.srcDir
     workDir = args.workDir
-    calcPcap = args.calcPcap
+    calcPcap = args.calc_pcap
     if srcDir is None:
         srcDir = os.getcwd() + "/QuadTreeSyncEvaluation/"
 
