@@ -2,6 +2,7 @@ import numpy
 import pandas
 import argparse
 import scipy.stats
+import os
 import matplotlib.pyplot as plotter
 from scripts.filefetcher import FileFetcher
 
@@ -403,9 +404,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-r", "--result-dir", help="Directory containing the result dirs of the runs",
                         default="../result-csv-files_6runs")
+    parser.add_argument("-o", "--output-dir", help="Directory for resulting figures",
+                        default="../plot-results/")
     args = parser.parse_args()
 
     csvDirectory = args.result_dir
+    outputDirectory = args.output_dir
+    if not os.path.isdir(outputDirectory):
+        os.makedirs(outputDirectory)
+
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
@@ -415,7 +422,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/allProtocols_packets.pdf")
+    plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
 
 
     #visualize bytes
@@ -427,7 +434,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/allProtocols_bytes.pdf")
+    plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
 
     #visualize summary
@@ -441,21 +448,21 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/allProtocols_loss.pdf")
+    plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
 
     #visualize in/out network-traffic
     visualizer = Visualizer("network", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/allProtocols_network_in_out.pdf")
+    plotter.savefig("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
 
     #visualize sync latencies
     visualizer = Visualizer("latencies", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/allProtocols_latencies.pdf")
+    plotter.savefig("{}/allProtocols_latencies.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
@@ -465,7 +472,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated"], ["cluster"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/p2p_loss.pdf")
+    plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
 
     # visualize network traffic in/out: P2P vs. QuadTree
     visualizer = Visualizer("network", csvDirectory, compareP2P=True)
@@ -475,7 +482,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated", "cluster"], ["in", "out"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/p2p_network_in_out.pdf")
+    plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
@@ -485,7 +492,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/p2p_packets.pdf")
+    plotter.savefig("{}/p2p_packets.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
@@ -495,7 +502,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
     plotter.tight_layout()
-    plotter.savefig("../plot-results/p2p_bytes.pdf")
+    plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
 
     # prevent overlapping of elements and show the plot
     #plotter.tight_layout()
