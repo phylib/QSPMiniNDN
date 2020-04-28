@@ -1,5 +1,6 @@
 import numpy
 import pandas
+import argparse
 import scipy.stats
 import matplotlib.pyplot as plotter
 from scripts.filefetcher import FileFetcher
@@ -399,7 +400,12 @@ class Visualizer:
 
 if __name__ == "__main__":
 
-    csvDirectory = "../result-csv-files_6runs"
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-r", "--result-dir", help="Directory containing the result dirs of the runs",
+                        default="../result-csv-files_6runs")
+    args = parser.parse_args()
+
+    csvDirectory = args.result_dir
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
