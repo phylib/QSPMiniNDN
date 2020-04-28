@@ -39,7 +39,7 @@ class Visualizer:
         self.clientConcentrations = clientConcentrations
 
     def getTransformationFactor(self):
-        if(self.data == "bytes" or self.data == "network"):
+        if(self.data == "bytes" or self.data == "network" or self.data == "network-out"):
             return 1000*1000
         else:
             return 1000
@@ -81,6 +81,8 @@ class Visualizer:
                 self.getValues(file.name, file, [protocol, barGroup, run] + filterCriteria, values)
             elif self.data == "network":
                 self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
+            elif self.data == "network-out":
+                self.getValues(file.name, file[file['in/out'] == "out"], [protocol, barGroup, run] + filterCriteria, values)
             elif self.data == "packets" or self.data == "bytes":
                 # columnFilter[0] defines if we filter by 'in' or 'out'
                 # columnFilter[1] defines the column-name
@@ -172,9 +174,9 @@ class Visualizer:
             labels.append(barGroup.capitalize())
 
         if(len(barGroups) <= 1):
-            sublabel = self.buildLabel(filterCriteria + barGroups)
+            title = self.buildLabel(filterCriteria + barGroups)
         else:
-            sublabel = self.buildLabel(filterCriteria)
+            title = self.buildLabel(filterCriteria)
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -205,7 +207,7 @@ class Visualizer:
         # define the labels, legend and remove the ticks
         axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
-        axis.set_xlabel("Setting: " + sublabel)
+        axis.set_title("Setting: " + title)
 
         if (len(barGroups) > 1):
             self.removeTicks(axis, showLabel=True)
@@ -215,13 +217,12 @@ class Visualizer:
         # set the labels according to the data we analyzed
         if(self.data == 'latencies'):
             ylabel = "Sync Latencies"
-            axis.set_title("Sync Latencies of %d different protocols" %len(self.protocols))
         elif(self.data == "network"):
             ylabel = "Bytes of Sync Payload"
-            axis.set_title("Bytes of Sync Payload of %d different protocols" %len(self.protocols))
+        elif (self.data == "network-out"):
+            ylabel = "Bytes of outgoing Sync Payload"
         else:
             ylabel = "Lost Data"
-            axis.set_title("Lost Data of %d different protocols" %len(self.protocols))
 
         axis.legend(legend, self.protocols)
         if(self.transformationFactor == 1000):
@@ -250,9 +251,9 @@ class Visualizer:
             labels.append(barGroup.capitalize())
 
         if (len(barGroups) <= 1):
-            sublabel = self.buildLabel(filterCriteria + barGroups)
+            title = self.buildLabel(filterCriteria + barGroups)
         else:
-            sublabel = self.buildLabel(filterCriteria)
+            title = self.buildLabel(filterCriteria)
 
         if self.data == "packets":
             columnFilters = {
@@ -307,7 +308,7 @@ class Visualizer:
         # define the labels, legend and remove the ticks
         axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
-        axis.set_xlabel("Setting: " + sublabel)
+        axis.set_title("Setting: " + title)
 
         if (len(barGroups) > 1):
             self.removeTicks(axis, showLabel=True)
@@ -317,10 +318,8 @@ class Visualizer:
         # set the labels according to the data we analyzed
         if self.data == "packets":
             ylabel = "Number of packets"
-            axis.set_title("Number of packets for %d different protocols" %len(self.protocols))
         else:
             ylabel = "Number of bytes"
-            axis.set_title("Number of bytes for %d different protocols" %len(self.protocols))
 
         if (self.transformationFactor == 1000):
             ylabel += (" [k]")
@@ -412,7 +411,7 @@ if __name__ == "__main__":
     outputDirectory = args.output_dir
     if not os.path.isdir(outputDirectory):
         os.makedirs(outputDirectory)
-
+   
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
@@ -504,9 +503,17 @@ if __name__ == "__main__":
     plotter.tight_layout()
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
 
-    # prevent overlapping of elements and show the plot
-    #plotter.tight_layout()
 
-    #plotter.show()
-    #plotter.savefig("loss.pdf")
+    # visualize outgoing network traffic
+    visualizer = Visualizer("network-out", csvDirectory)
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
+    figure.set_size_inches(15, 7)
+    visualizer.plotSimpleBarChart(axes[0][0], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][2], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][0], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][2], ["16", "concentrated"], ["cluster", "continent"])
+    plotter.tight_layout()
+    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
 

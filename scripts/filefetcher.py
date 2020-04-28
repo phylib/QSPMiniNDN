@@ -25,7 +25,7 @@ class FileFetcher:
             filename = fileDirectory + ".csv"
             dataframe = pandas.read_csv(self.csvDirectory+"/"+fileDirectory+"/"+filename, sep="\t", usecols=["syncLatency"])
             dataframe.name = filename
-        elif self.data == "network":
+        elif self.data == "network" or self.data == "network-out":
             filename = "network-stats.csv"
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
                                         usecols=["in/out", "bytesSyncPayload"])
