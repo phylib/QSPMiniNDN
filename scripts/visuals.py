@@ -17,6 +17,7 @@ class Visualizer:
         self.data = data
         self.fileFetcher = FileFetcher(data, directory)
         self.compareP2P = compareP2P
+        self.y_limits = []
 
         if not(compareP2P) and self.data == "latencies":
             self.setSettings(3, [4, 16], ["cluster", "continent"],
@@ -174,9 +175,9 @@ class Visualizer:
             labels.append(barGroup.capitalize())
 
         if(len(barGroups) <= 1):
-            title = self.buildLabel(filterCriteria + barGroups)
+            xlabel = self.buildLabel(filterCriteria + barGroups)
         else:
-            title = self.buildLabel(filterCriteria)
+            xlabel = self.buildLabel(filterCriteria)
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -207,7 +208,6 @@ class Visualizer:
         # define the labels, legend and remove the ticks
         axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
-        axis.set_title("Setting: " + title)
 
         if (len(barGroups) > 1):
             self.removeTicks(axis, showLabel=True)
@@ -231,10 +231,15 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
+        axis.set_xlabel("Setting: " + xlabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
         axis.yaxis.grid(True)
+
+        # get maximum y-value
+        for i in range(len(means)):
+            self.y_limits.append(means[i] + stds[i])
 
 
     def plotStackedBarChart(self, axis, filterCriteria, barGroups):
@@ -251,9 +256,9 @@ class Visualizer:
             labels.append(barGroup.capitalize())
 
         if (len(barGroups) <= 1):
-            title = self.buildLabel(filterCriteria + barGroups)
+            xlabel = self.buildLabel(filterCriteria + barGroups)
         else:
-            title = self.buildLabel(filterCriteria)
+            xlabel = self.buildLabel(filterCriteria)
 
         if self.data == "packets":
             columnFilters = {
@@ -275,7 +280,6 @@ class Visualizer:
                 columnmeans.append(data[0])
             means.append(columnmeans)
 
-        print(means)
 
         # define the starting position ( = position of first bar) for each bar group
         # as well as the width and color for the bars
@@ -308,7 +312,6 @@ class Visualizer:
         # define the labels, legend and remove the ticks
         axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
-        axis.set_title("Setting: " + title)
 
         if (len(barGroups) > 1):
             self.removeTicks(axis, showLabel=True)
@@ -327,12 +330,17 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-
+        axis.set_xlabel("Setting: " + xlabel)
         axis.legend(legend, legendlabels)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
         axis.yaxis.grid(True)
+
+        # get maximum y-value
+        for i in range(len(means)):
+            for j in range(len(means[i])):
+                self.y_limits.append(numpy.sum(means[i][j]))
 
 
     def getBar(self, axis, position, mean, width, bottom, error, errorcolor, capsize, color, edgecolor, hatch=None):
@@ -398,6 +406,18 @@ class Visualizer:
 
         return label
 
+    def setMaxY(self, axes, rows, columns):
+        axes = numpy.array(axes)
+        y_limit = numpy.max(self.y_limits)
+        if(1 in [rows, columns] and rows!=columns):
+            for index in range(columns):
+                axes[index].set_ylim(top=y_limit)
+        else:
+            for i in range(rows):
+                for j in range(columns):
+                    axes[i][j].set_ylim(top=y_limit)
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -411,7 +431,7 @@ if __name__ == "__main__":
     outputDirectory = args.output_dir
     if not os.path.isdir(outputDirectory):
         os.makedirs(outputDirectory)
-   
+
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
@@ -420,6 +440,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 2)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
 
@@ -432,6 +453,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 2)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
@@ -446,6 +468,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
 
@@ -470,6 +493,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
 
@@ -480,6 +504,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated", "cluster"], ["in", "out"])
+    visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
@@ -490,6 +515,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_packets.pdf".format(outputDirectory))
 
@@ -500,6 +526,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
+    visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
 
@@ -514,6 +541,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1][0], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1][2], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
