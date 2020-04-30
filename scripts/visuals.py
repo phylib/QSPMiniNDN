@@ -19,6 +19,11 @@ class Visualizer:
         self.compareP2P = compareP2P
         self.y_limits = []
 
+        # responses can only be compared for P2P and QuadTree
+        # --> set compareP2P = True
+        if self.data == "responses":
+            compareP2P = True
+
         if not(compareP2P) and self.data == "latencies":
             self.setSettings(3, [4, 16], ["cluster", "continent"],
                              ["QuadTree", "StateVector", "ZMQ"], ["concentrated", "very-distributed"])
@@ -53,9 +58,20 @@ class Visualizer:
             for topology in self.topologies:
                 for protocol in self.protocols:
                     for clientConcentration in self.clientConcentrations:
-                        for i in range(self.runNumber):
-                            file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
-                            self.files.append(file)
+                            for i in range(self.runNumber):
+                                if(self.data == "responses"):
+                                    for server in range(serverNumber):
+                                        file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i,
+                                                                           clientConcentration, serverFolder = "s" + str(server))
+                                        if(not(file.empty)):
+                                            self.files.append(file)
+                                            print(file.name)
+                                            print(file)
+
+
+                                else:
+                                    file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
+                                    self.files.append(file)
 
 
     def getMeanPerRun(self, protocol, barGroup, filterCriteria, run, columnFilter=None):
@@ -431,7 +447,7 @@ if __name__ == "__main__":
     outputDirectory = args.output_dir
     if not os.path.isdir(outputDirectory):
         os.makedirs(outputDirectory)
-
+    '''
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
@@ -543,5 +559,9 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1][2], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
-    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
+    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))'''
+
+    #visualize responses in P2P vs. QuadTree
+    visualizer = Visualizer("responses", csvDirectory)
+
 

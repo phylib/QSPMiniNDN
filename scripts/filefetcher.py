@@ -1,4 +1,5 @@
 import pandas
+import os
 
 class FileFetcher:
     def __init__(self, data, directory):
@@ -9,10 +10,12 @@ class FileFetcher:
         self.data = data
         if data == "latencies":
             self.csvDirectory = "../result-csv-files_3runs"
+        elif data == "responses":
+            self.csvDirectory = "../2020-04-08_stats-files"
         else:
             self.csvDirectory = directory
 
-    def getCSVFile(self, numServers, topology, protocol, runNumber, clientConcentration):
+    def getCSVFile(self, numServers, topology, protocol, runNumber, clientConcentration, serverFolder=None):
         """
         each file lies in another folder inside the csvDirectory
         this folder has the same name as the file (without file extension);
@@ -40,6 +43,13 @@ class FileFetcher:
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
                                         usecols=["in/out", "bytesInterests", "bytesData", "bytesIPSyncPackets"])
             dataframe.name = fileDirectory + ".csv"
+        elif self.data == "responses":
+            responsefileDirectory = fileDirectory + "/" + serverFolder + "/log"
+            filename = os.listdir(self.csvDirectory + "/" + responsefileDirectory)[0]
+            dataframe = self.parseTextFile(self.csvDirectory + "/" + responsefileDirectory + "/" + filename)
+            dataframe.name = fileDirectory + ".csv"
+
+
         else:
             filename = "summary.csv"
             dataframe = pandas.read_csv(self.csvDirectory + "/" + fileDirectory + "/" + filename, sep="\t",
@@ -48,3 +58,19 @@ class FileFetcher:
 
 
         return dataframe
+
+    def parseTextFile(self, filename):
+        dataframeList = [[]]
+        columns = []
+        file = open(filename, 'r')
+        lines = file.readlines()
+        file.close()
+        for line in lines:
+            content = line.split(": ")
+            columns.append(content[0])
+            dataframeList[0].append(content[1].strip('\n'))
+
+
+        return pandas.DataFrame(dataframeList, columns=columns)
+
+
