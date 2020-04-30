@@ -58,20 +58,16 @@ class Visualizer:
             for topology in self.topologies:
                 for protocol in self.protocols:
                     for clientConcentration in self.clientConcentrations:
-                            for i in range(self.runNumber):
-                                if(self.data == "responses"):
-                                    for server in range(serverNumber):
-                                        file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i,
+                        for i in range(self.runNumber):
+                            if(self.data == "responses"):
+                                for server in range(serverNumber):
+                                    file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i,
                                                                            clientConcentration, serverFolder = "s" + str(server))
-                                        if(not(file.empty)):
-                                            self.files.append(file)
-                                            print(file.name)
-                                            print(file)
-
-
-                                else:
-                                    file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
-                                    self.files.append(file)
+                                    if(not(file.empty)):
+                                        self.files.append(file)
+                            else:
+                                file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
+                                self.files.append(file)
 
 
     def getMeanPerRun(self, protocol, barGroup, filterCriteria, run, columnFilter=None):
@@ -100,6 +96,8 @@ class Visualizer:
                 self.getValues(file.name, file[file['in/out'] == barGroup], [protocol, run] + filterCriteria, values)
             elif self.data == "network-out":
                 self.getValues(file.name, file[file['in/out'] == "out"], [protocol, barGroup, run] + filterCriteria, values)
+            elif self.data == "responses":
+                self.getValues(file.name, pandas.DataFrame(file[barGroup]), [protocol, run] + filterCriteria, values)
             elif self.data == "packets" or self.data == "bytes":
                 # columnFilter[0] defines if we filter by 'in' or 'out'
                 # columnFilter[1] defines the column-name
@@ -237,6 +235,8 @@ class Visualizer:
             ylabel = "Bytes of Sync Payload"
         elif (self.data == "network-out"):
             ylabel = "Bytes of outgoing Sync Payload"
+        elif(self.data == "responses"):
+            ylabel = "Received Responses"
         else:
             ylabel = "Lost Data"
 
@@ -447,7 +447,7 @@ if __name__ == "__main__":
     outputDirectory = args.output_dir
     if not os.path.isdir(outputDirectory):
         os.makedirs(outputDirectory)
-    '''
+
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
@@ -559,9 +559,21 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1][2], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
-    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))'''
+    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
-    #visualize responses in P2P vs. QuadTree
+    # visualize responses in P2P vs. QuadTree in one plot
     visualizer = Visualizer("responses", csvDirectory)
+    figure, axis = plotter.subplots()
+    visualizer.plotSimpleBarChart(axis, ["16","cluster"], ["received_chunk_responses", "received_subtree_responses"])
+    plotter.tight_layout()
+    plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
 
+    #visualize responses in P2P vs. QuadTree with subplots
+    visualizer = Visualizer("responses", csvDirectory)
+    figure, axes = plotter.subplots(nrows=1, ncols=2)
+    figure.set_size_inches(10, 7)
+    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster"], ["received_chunk_responses"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["received_subtree_responses"])
+    plotter.tight_layout()
+    plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 

@@ -68,7 +68,7 @@ class FileFetcher:
         for line in lines:
             content = line.split(": ")
             columns.append(content[0])
-            dataframeList[0].append(content[1].strip('\n'))
+            dataframeList[0].append(int(content[1].strip('\n')))
 
 
         return pandas.DataFrame(dataframeList, columns=columns)
