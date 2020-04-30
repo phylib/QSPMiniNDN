@@ -65,6 +65,7 @@ class Visualizer:
                                                                            clientConcentration, serverFolder = "s" + str(server))
                                     if(not(file.empty)):
                                         self.files.append(file)
+
                             else:
                                 file = self.fileFetcher.getCSVFile(serverNumber, topology, protocol, i, clientConcentration)
                                 self.files.append(file)
