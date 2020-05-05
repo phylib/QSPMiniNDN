@@ -36,6 +36,27 @@ class Visualizer:
         self.files = []
         self.fetchAllFiles()
         self.transformationFactor = self.getTransformationFactor()
+        self.labelDictionary = {
+            'QuadTree': 'QSP',
+            'StateVector': 'SVS',
+            'ZMQ': 'ZMQ Pub/Sub',
+            'P2P': 'Peer-to-Peer',
+            'cluster': 'Data Center',
+            'continent': 'GEANT-Topology',
+            'concentrated': 'concentrated scenario',
+            'distributed': 'widespread scenario',
+            'very-distributed': 'max distance scenario',
+            'in': 'ingoing',
+            'out': 'outgoing',
+            '#interests': 'number of interest packets',
+            'bytesInterests': 'bytes of interest packets',
+            '#data': 'number of data packets',
+            'bytesData': 'bytes of data packets',
+            '#IPSyncPackets': 'number of IP-Sync packets',
+            'bytesIPSyncPackets': 'bytes of IP-Sync packets',
+            'received_chunk_responses' : 'Received Chunk Responses',
+            'received_subtree_responses': 'Received Subtree Responses'
+        }
 
     def setSettings(self, runNumber, serverNumbers, topologies, protocols, clientConcentrations):
         self.runNumber = runNumber
@@ -186,8 +207,9 @@ class Visualizer:
         means = []
         stds = []
         labels = []
+        legendlabels = []
         for barGroup in barGroups:
-            labels.append(barGroup.capitalize())
+            labels.append(self.labelDictionary[barGroup])
 
         if(len(barGroups) <= 1):
             xlabel = self.buildLabel(filterCriteria + barGroups)
@@ -200,6 +222,7 @@ class Visualizer:
             data = self.getProtocolData(protocol, filterCriteria, barGroups)
             means.append(data[0])
             stds.append(data[1])
+            legendlabels.append(self.labelDictionary[protocol])
 
         # define the starting position ( = position of first bar) for each bar group
         # as well as the width and color for the bars
@@ -241,7 +264,8 @@ class Visualizer:
         else:
             ylabel = "Lost Data"
 
-        axis.legend(legend, self.protocols)
+        axis.legend(legend, legendlabels)
+
         if(self.transformationFactor == 1000):
             ylabel += (" [k]")
         else:
@@ -270,7 +294,7 @@ class Visualizer:
         means = []
         labels = []
         for barGroup in barGroups:
-            labels.append(barGroup.capitalize())
+            labels.append(self.labelDictionary[barGroup])
 
         if (len(barGroups) <= 1):
             xlabel = self.buildLabel(filterCriteria + barGroups)
@@ -323,7 +347,7 @@ class Visualizer:
                                       None, 10, colors[i], "black", )
                 bars.append(bar)
                 legend.append(bar[0])
-                legendlabels.append("%s %s" %(protocol, columnFilters[protocol][j][1]))
+                legendlabels.append("%s %s" %(self.labelDictionary[protocol], self.labelDictionary[columnFilters[protocol][j][1]]))
             i += 1
 
         # define the labels, legend and remove the ticks
@@ -395,12 +419,7 @@ class Visualizer:
 
             # define the concentration level of clients
             elif criterion in self.clientConcentrations:
-                if(criterion == "concentrated"):
-                    concentrationLevel = "concentrated scenario"
-                elif(criterion == "distributed"):
-                    concentrationLevel = "widespread scenario"
-                else:
-                    concentrationLevel = "max distance scenario"
+                concentrationLevel = self.labelDictionary[criterion]
                 label += concentrationLevel
 
             # if the criterion is a topology do not put a space in front of
@@ -408,7 +427,7 @@ class Visualizer:
             elif criterion in self.topologies:
                 if i > 0:
                     label += " "
-                label += "in a %s" %criterion
+                label += "in a %s" %self.labelDictionary[criterion]
 
             # if the current criterion is not the last one --> add 'and' to label
             # do not add 'and' if the current criterion is the first one
@@ -594,8 +613,8 @@ if __name__ == "__main__":
     visualizer = Visualizer("responses", csvDirectory)
     figure, axes = plotter.subplots(nrows=1, ncols=2)
     figure.set_size_inches(10, 7)
-    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster"], ["received_chunk_responses"])
-    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["received_subtree_responses"])
+    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
     print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
