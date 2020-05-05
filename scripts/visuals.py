@@ -585,17 +585,18 @@ if __name__ == "__main__":
     # visualize responses in P2P vs. QuadTree in one plot
     visualizer = Visualizer("responses", csvDirectory)
     figure, axis = plotter.subplots()
-    visualizer.plotSimpleBarChart(axis, ["16","cluster"], ["received_chunk_responses", "received_subtree_responses"])
+    visualizer.plotSimpleBarChart(axis, ["16", "cluster", 'concentrated'],
+                                  ["received_chunk_responses", "received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
     print("{}/p2p_responses.pdf".format(outputDirectory))
 
-    #visualize responses in P2P vs. QuadTree with subplots
+    # visualize responses in P2P vs. QuadTree with subplots
     visualizer = Visualizer("responses", csvDirectory)
     figure, axes = plotter.subplots(nrows=1, ncols=2)
     figure.set_size_inches(10, 7)
-    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster"], ["received_chunk_responses"])
-    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["received_subtree_responses"])
+    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", 'concentrated'], ["received_chunk_responses"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", 'concentrated'], ["received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
     print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
