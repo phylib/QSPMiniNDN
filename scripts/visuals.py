@@ -248,7 +248,7 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-        axis.set_xlabel("Setting: " + xlabel)
+        axis.set_xlabel(xlabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -396,11 +396,11 @@ class Visualizer:
             # define the concentration level of clients
             elif criterion in self.clientConcentrations:
                 if(criterion == "concentrated"):
-                    concentrationLevel = "high"
+                    concentrationLevel = "concentrated scenario"
                 elif(criterion == "distributed"):
-                    concentrationLevel = "low"
+                    concentrationLevel = "widespread scenario"
                 else:
-                    concentrationLevel = "very low"
+                    concentrationLevel = "max distance scenario"
                 label += "%s client concentration" %concentrationLevel
 
             # if the criterion is a topology do not put a space in front of
@@ -416,16 +416,16 @@ class Visualizer:
             # example: "cluster with 16 servers.....", instead of "cluster and 16 servers...."
             if i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
                     and not(criterion in self.topologies and i == 0):
-                label += " and "
+                label += ", "
             elif i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
                     and (criterion in self.topologies and i == 0):
-                label += " with "
+                label += ", "
 
         return label
 
     def setMaxY(self, axes, rows, columns):
         axes = numpy.array(axes)
-        y_limit = numpy.max(self.y_limits)
+        y_limit = numpy.max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit)
