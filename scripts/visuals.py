@@ -248,7 +248,7 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-        axis.set_xlabel("Setting: " + xlabel)
+        axis.set_xlabel(xlabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -396,12 +396,12 @@ class Visualizer:
             # define the concentration level of clients
             elif criterion in self.clientConcentrations:
                 if(criterion == "concentrated"):
-                    concentrationLevel = "high"
+                    concentrationLevel = "concentrated scenario"
                 elif(criterion == "distributed"):
-                    concentrationLevel = "low"
+                    concentrationLevel = "widespread scenario"
                 else:
-                    concentrationLevel = "very low"
-                label += "%s client concentration" %concentrationLevel
+                    concentrationLevel = "max distance scenario"
+                label += concentrationLevel
 
             # if the criterion is a topology do not put a space in front of
             # it, if it is the first criterion used in the label
@@ -416,16 +416,16 @@ class Visualizer:
             # example: "cluster with 16 servers.....", instead of "cluster and 16 servers...."
             if i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
                     and not(criterion in self.topologies and i == 0):
-                label += " and "
+                label += ", "
             elif i < (len(filterCriteria)-1) and not(filterCriteria[i+1] in self.topologies)\
                     and (criterion in self.topologies and i == 0):
-                label += " with "
+                label += ", "
 
         return label
 
     def setMaxY(self, axes, rows, columns):
         axes = numpy.array(axes)
-        y_limit = numpy.max(self.y_limits)
+        y_limit = numpy.max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit)
@@ -433,6 +433,10 @@ class Visualizer:
             for i in range(rows):
                 for j in range(columns):
                     axes[i][j].set_ylim(top=y_limit)
+
+    def prependYAxisLabel(self, axis, prependLabel):
+        newLabel = prependLabel + axis.get_ylabel()
+        axis.set_ylabel(newLabel)
 
 
 if __name__ == "__main__":
@@ -451,15 +455,20 @@ if __name__ == "__main__":
 
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
-    figure, axes = plotter.subplots(nrows=2, ncols=2)
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 7)
-    visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.setMaxY(axes, 2, 2)
+    visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
+    print("{}/allProtocols_packets.pdf".format(outputDirectory))
 
 
     #visualize bytes
@@ -473,6 +482,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 2)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
+    print("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
 
     #visualize summary
@@ -488,6 +498,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
+    print("{}/allProtocols_loss.pdf".format(outputDirectory))
 
     #visualize in/out network-traffic
     visualizer = Visualizer("network", csvDirectory)
@@ -495,6 +506,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
+    print("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
 
     #visualize sync latencies
     visualizer = Visualizer("latencies", csvDirectory)
@@ -502,6 +514,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_latencies.pdf".format(outputDirectory))
+    print("{}/allProtocols_latencies.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
@@ -513,6 +526,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
+    print("{}/p2p_loss.pdf".format(outputDirectory))
 
     # visualize network traffic in/out: P2P vs. QuadTree
     visualizer = Visualizer("network", csvDirectory, compareP2P=True)
@@ -524,6 +538,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
+    print("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
@@ -535,6 +550,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_packets.pdf".format(outputDirectory))
+    print("{}/p2p_packets.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
@@ -546,21 +562,25 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
+    print("{}/p2p_bytes.pdf".format(outputDirectory))
 
 
     # visualize outgoing network traffic
     visualizer = Visualizer("network-out", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 7)
-    visualizer.plotSimpleBarChart(axes[0][0], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[0][2], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][0], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][0], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][2], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
+    print("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
     # visualize responses in P2P vs. QuadTree in one plot
     visualizer = Visualizer("responses", csvDirectory)
@@ -568,6 +588,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16","cluster"], ["received_chunk_responses", "received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
+    print("{}/p2p_responses.pdf".format(outputDirectory))
 
     #visualize responses in P2P vs. QuadTree with subplots
     visualizer = Visualizer("responses", csvDirectory)
@@ -577,4 +598,5 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
+    print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 
