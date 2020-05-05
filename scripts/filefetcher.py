@@ -1,5 +1,6 @@
 import pandas
 import os
+import glob
 
 class FileFetcher:
     def __init__(self, data, directory):
@@ -45,7 +46,7 @@ class FileFetcher:
             dataframe.name = fileDirectory + ".csv"
         elif self.data == "responses":
             responsefileDirectory = fileDirectory + "/" + serverFolder + "/log"
-            filename = os.listdir(self.csvDirectory + "/" + responsefileDirectory)[0]
+            filename = glob.glob(self.csvDirectory + "/" + responsefileDirectory + "/*_stats.txt")[0]
             dataframe = self.parseTextFile(self.csvDirectory + "/" + responsefileDirectory + "/" + filename)
             dataframe.name = fileDirectory + "_" + serverFolder  + ".csv"
 
@@ -67,9 +68,9 @@ class FileFetcher:
         file.close()
         for line in lines:
             content = line.split(": ")
-            columns.append(content[0])
-            dataframeList[0].append(int(content[1].strip('\n')))
-
+            if len(content) > 1:
+                columns.append(content[0])
+                dataframeList[0].append(int(content[1].strip('\n')))
 
         return pandas.DataFrame(dataframeList, columns=columns)
 
