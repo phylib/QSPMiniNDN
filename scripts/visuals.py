@@ -401,7 +401,7 @@ class Visualizer:
                     concentrationLevel = "widespread scenario"
                 else:
                     concentrationLevel = "max distance scenario"
-                label += "%s client concentration" %concentrationLevel
+                label += concentrationLevel
 
             # if the criterion is a topology do not put a space in front of
             # it, if it is the first criterion used in the label
@@ -455,7 +455,7 @@ if __name__ == "__main__":
     figure.set_size_inches(15, 7)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 1], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
