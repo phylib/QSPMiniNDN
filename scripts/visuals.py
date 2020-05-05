@@ -462,6 +462,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
+    print("{}/allProtocols_packets.pdf".format(outputDirectory))
 
 
     #visualize bytes
@@ -475,6 +476,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 2)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
+    print("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
 
     #visualize summary
@@ -490,6 +492,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
+    print("{}/allProtocols_loss.pdf".format(outputDirectory))
 
     #visualize in/out network-traffic
     visualizer = Visualizer("network", csvDirectory)
@@ -497,6 +500,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
+    print("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
 
     #visualize sync latencies
     visualizer = Visualizer("latencies", csvDirectory)
@@ -504,6 +508,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_latencies.pdf".format(outputDirectory))
+    print("{}/allProtocols_latencies.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
@@ -515,6 +520,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
+    print("{}/p2p_loss.pdf".format(outputDirectory))
 
     # visualize network traffic in/out: P2P vs. QuadTree
     visualizer = Visualizer("network", csvDirectory, compareP2P=True)
@@ -526,6 +532,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
+    print("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
@@ -537,6 +544,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_packets.pdf".format(outputDirectory))
+    print("{}/p2p_packets.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
@@ -548,6 +556,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 3, 1)
     plotter.tight_layout()
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
+    print("{}/p2p_bytes.pdf".format(outputDirectory))
 
 
     # visualize outgoing network traffic
@@ -563,6 +572,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
+    print("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
     # visualize responses in P2P vs. QuadTree in one plot
     visualizer = Visualizer("responses", csvDirectory)
@@ -570,6 +580,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axis, ["16","cluster"], ["received_chunk_responses", "received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
+    print("{}/p2p_responses.pdf".format(outputDirectory))
 
     #visualize responses in P2P vs. QuadTree with subplots
     visualizer = Visualizer("responses", csvDirectory)
@@ -579,4 +590,5 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["received_subtree_responses"])
     plotter.tight_layout()
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
+    print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 
