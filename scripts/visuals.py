@@ -434,6 +434,10 @@ class Visualizer:
                 for j in range(columns):
                     axes[i][j].set_ylim(top=y_limit)
 
+    def prependYAxisLabel(self, axis, prependLabel):
+        newLabel = prependLabel + axis.get_ylabel()
+        axis.set_ylabel(newLabel)
+
 
 if __name__ == "__main__":
 
@@ -460,6 +464,8 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
     print("{}/allProtocols_packets.pdf".format(outputDirectory))
@@ -570,6 +576,8 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     plotter.tight_layout()
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
     print("{}/allProtocols_network_out.pdf".format(outputDirectory))
