@@ -47,7 +47,7 @@ class FileFetcher:
         elif self.data == "responses":
             responsefileDirectory = fileDirectory + "/" + serverFolder + "/log"
             filename = glob.glob(self.csvDirectory + "/" + responsefileDirectory + "/*_stats.txt")[0]
-            dataframe = self.parseTextFile(self.csvDirectory + "/" + responsefileDirectory + "/" + filename)
+            dataframe = self.parseTextFile(filename)
             dataframe.name = fileDirectory + "_" + serverFolder  + ".csv"
 
 
