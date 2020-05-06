@@ -18,6 +18,7 @@ class Visualizer:
         self.fileFetcher = FileFetcher(data, directory)
         self.compareP2P = compareP2P
         self.y_limits = []
+        self.legendLabels = set(())
 
         # responses can only be compared for P2P and QuadTree
         # --> set compareP2P = True
@@ -207,7 +208,7 @@ class Visualizer:
         means = []
         stds = []
         labels = []
-        legendlabels = []
+        #legendlabels = []
         for barGroup in barGroups:
             labels.append(self.labelDictionary[barGroup])
 
@@ -222,7 +223,7 @@ class Visualizer:
             data = self.getProtocolData(protocol, filterCriteria, barGroups)
             means.append(data[0])
             stds.append(data[1])
-            legendlabels.append(self.labelDictionary[protocol])
+            self.legendLabels.add(self.labelDictionary[protocol])
 
         # define the starting position ( = position of first bar) for each bar group
         # as well as the width and color for the bars
@@ -264,7 +265,7 @@ class Visualizer:
         else:
             ylabel = "Lost Data"
 
-        axis.legend(legend, legendlabels)
+        #axis.legend(legend, legendlabels)
 
         if(self.transformationFactor == 1000):
             ylabel += (" [k]")
@@ -335,7 +336,7 @@ class Visualizer:
         # define the bars for each protocol we want to represent in the different bar groups
         bars = []
         legend = []
-        legendlabels = []
+        #legendlabels = []
         i = 0
         for protocol in self.protocols:
             for j in range(len(columnFilters[protocol])):
@@ -347,7 +348,8 @@ class Visualizer:
                                       None, 10, colors[i], "black", )
                 bars.append(bar)
                 legend.append(bar[0])
-                legendlabels.append("%s %s" %(self.labelDictionary[protocol], self.labelDictionary[columnFilters[protocol][j][1]]))
+                self.legendLabels.add("%s %s" %(self.labelDictionary[protocol],
+                                                    self.labelDictionary[columnFilters[protocol][j][1]]))
             i += 1
 
         # define the labels, legend and remove the ticks
@@ -372,7 +374,7 @@ class Visualizer:
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
         axis.set_xlabel("Setting: " + xlabel)
-        axis.legend(legend, legendlabels)
+        #axis.legend(legend, legendlabels)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -475,7 +477,7 @@ if __name__ == "__main__":
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 7)
+    figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
@@ -485,7 +487,10 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
-    plotter.tight_layout()
+    legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
     print("{}/allProtocols_packets.pdf".format(outputDirectory))
 
@@ -493,13 +498,16 @@ if __name__ == "__main__":
     #visualize bytes
     visualizer = Visualizer("bytes", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
-    figure.set_size_inches(15, 7)
+    figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[0, 1], ["16", "concentrated"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 2)
-    plotter.tight_layout()
+    legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
     print("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
@@ -515,7 +523,10 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
     print("{}/allProtocols_loss.pdf".format(outputDirectory))
 
@@ -523,7 +534,10 @@ if __name__ == "__main__":
     visualizer = Visualizer("network", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
     print("{}/allProtocols_network_in_out.pdf".format(outputDirectory))
 
@@ -531,55 +545,70 @@ if __name__ == "__main__":
     visualizer = Visualizer("latencies", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_latencies.pdf".format(outputDirectory))
     print("{}/allProtocols_latencies.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
-    figure, axes = plotter.subplots(nrows=3, ncols=1)
-    figure.set_size_inches(7, 15)
+    figure, axes = plotter.subplots(nrows=1, ncols=3)
+    figure.set_size_inches(15,7)
     visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated"], ["cluster"])
-    visualizer.setMaxY(axes, 3, 1)
-    plotter.tight_layout()
+    visualizer.setMaxY(axes, 1, 3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
     print("{}/p2p_loss.pdf".format(outputDirectory))
 
     # visualize network traffic in/out: P2P vs. QuadTree
     visualizer = Visualizer("network", csvDirectory, compareP2P=True)
-    figure, axes = plotter.subplots(nrows=3, ncols=1)
-    figure.set_size_inches(7, 15)
+    figure, axes = plotter.subplots(nrows=1, ncols=3)
+    figure.set_size_inches(15,7)
     visualizer.plotSimpleBarChart(axes[0], ["16", "very-distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "concentrated", "cluster"], ["in", "out"])
-    visualizer.setMaxY(axes, 3, 1)
-    plotter.tight_layout()
+    visualizer.setMaxY(axes, 1,3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
     print("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
-    figure, axes = plotter.subplots(nrows=3, ncols=1)
-    figure.set_size_inches(7, 15)
+    figure, axes = plotter.subplots(nrows=1, ncols=3)
+    figure.set_size_inches(15,7)
     visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
-    visualizer.setMaxY(axes, 3, 1)
-    plotter.tight_layout()
+    visualizer.setMaxY(axes,1,3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_packets.pdf".format(outputDirectory))
     print("{}/p2p_packets.pdf".format(outputDirectory))
 
     # visualize summary: P2P vs. QuadTree
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
-    figure, axes = plotter.subplots(nrows=3, ncols=1)
-    figure.set_size_inches(7, 15)
+    figure, axes = plotter.subplots(nrows=1, ncols=3)
+    figure.set_size_inches(15,7)
     visualizer.plotStackedBarChart(axes[0], ["16", "very-distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
     visualizer.plotStackedBarChart(axes[2], ["16", "concentrated"], ["cluster"])
-    visualizer.setMaxY(axes, 3, 1)
-    plotter.tight_layout()
+    visualizer.setMaxY(axes, 1, 3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
     print("{}/p2p_bytes.pdf".format(outputDirectory))
 
@@ -597,7 +626,10 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
     print("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
@@ -606,7 +638,10 @@ if __name__ == "__main__":
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "cluster", 'concentrated'],
                                   ["received_chunk_responses", "received_subtree_responses"])
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
     print("{}/p2p_responses.pdf".format(outputDirectory))
 
@@ -616,8 +651,10 @@ if __name__ == "__main__":
     figure.set_size_inches(10, 7)
     visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"])
-
-    plotter.tight_layout()
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
     print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 
