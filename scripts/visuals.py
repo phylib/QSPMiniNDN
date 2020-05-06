@@ -663,3 +663,17 @@ if __name__ == "__main__":
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
     print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 
+    # visualize network-out in P2P vs. QuadTree with subplots
+    visualizer = Visualizer("network-out", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=1, ncols=3)
+    figure.set_size_inches(15, 7)
+    visualizer.plotSimpleBarChart(axes[0], ["16","cluster"], ["very-distributed"])
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["distributed"])
+    visualizer.plotSimpleBarChart(axes[2], ["16", "cluster"], ["concentrated"])
+    visualizer.setMaxY(axes, 1, 3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
+    plotter.savefig("{}/p2p_network_out.pdf".format(outputDirectory))
+    print("{}/p2p_network_out.pdf".format(outputDirectory))
