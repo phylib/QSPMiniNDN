@@ -196,7 +196,7 @@ class Visualizer:
 
 
 
-    def plotSimpleBarChart(self, axis, filterCriteria, barGroups):
+    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, subplots = False):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -212,9 +212,9 @@ class Visualizer:
         for barGroup in barGroups:
             labels.append(self.labelDictionary[barGroup])
 
-        if(len(barGroups) <= 1):
-            xlabel = self.buildLabel(filterCriteria + barGroups)
-        else:
+        if(len(barGroups) <= 1 and not(self.data == 'responses' and subplots)):
+                xlabel = self.buildLabel(filterCriteria + barGroups)
+        elif(not(self.data == 'responses' and subplots)):
             xlabel = self.buildLabel(filterCriteria)
 
         # calculate the means + standard deviations per bar group
@@ -245,10 +245,13 @@ class Visualizer:
             legend.append(bar[0])
 
         # define the labels, legend and remove the ticks
-        axis.set_xticks(x_pos + (space+width))
+        if(self.data == 'responses' and subplots):
+            axis.set_xticks((x_pos + (space + width))/2)
+        else:
+            axis.set_xticks(x_pos + (space+width))
         axis.set_xticklabels(labels)
 
-        if (len(barGroups) > 1):
+        if (len(barGroups) > 1 or (self.data == 'responses' and subplots)):
             self.removeTicks(axis, showLabel=True)
         else:
             self.removeTicks(axis, showLabel=False)
@@ -273,7 +276,8 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-        axis.set_xlabel(xlabel)
+        if(not(self.data == 'responses' and subplots)):
+            axis.set_xlabel(xlabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -475,7 +479,7 @@ if __name__ == "__main__":
         os.makedirs(outputDirectory)
 
     # visualize packets
-    visualizer = Visualizer("packets", csvDirectory)
+    '''visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
@@ -643,16 +647,17 @@ if __name__ == "__main__":
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
-    print("{}/p2p_responses.pdf".format(outputDirectory))
+    print("{}/p2p_responses.pdf".format(outputDirectory))'''
 
     # visualize responses in P2P vs. QuadTree with subplots
     visualizer = Visualizer("responses", csvDirectory)
     figure, axes = plotter.subplots(nrows=1, ncols=2)
     figure.set_size_inches(10, 7)
-    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"])
-    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"])
+    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"], subplots = True)
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"], subplots = True)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
+    figure.suptitle(visualizer.buildLabel(["16", "cluster", "concentrated"]), y = 0.15 )
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
