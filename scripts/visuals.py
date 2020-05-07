@@ -292,7 +292,7 @@ class Visualizer:
 
         # get maximum y-value
         for i in range(len(means)):
-            self.y_limits.append(means[i] + stds[i])
+            self.y_limits.append(numpy.sum([means[i], stds[i]]))
 
 
     def plotStackedBarChart(self, axis, filterCriteria, barGroups):
@@ -461,7 +461,7 @@ class Visualizer:
 
     def setMaxY(self, axes, rows, columns):
         axes = numpy.array(axes)
-        y_limit = numpy.max(self.y_limits) * 1.1
+        y_limit = max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit, bottom=0)
@@ -490,7 +490,7 @@ if __name__ == "__main__":
         os.makedirs(outputDirectory)
 
     # visualize packets
-    '''visualizer = Visualizer("packets", csvDirectory)
+    visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
@@ -597,7 +597,7 @@ if __name__ == "__main__":
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_network_in_out.pdf".format(outputDirectory))
-    print("{}/p2p_network_in_out.pdf".format(outputDirectory))'''
+    print("{}/p2p_network_in_out.pdf".format(outputDirectory))
 
     # visualize packets: P2P vs. QuadTree
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
