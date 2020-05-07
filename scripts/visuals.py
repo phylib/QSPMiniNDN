@@ -501,7 +501,7 @@ if __name__ == "__main__":
         os.makedirs(outputDirectory)
 
     # visualize packets
-    visualizer = Visualizer("packets", csvDirectory)
+    '''visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
@@ -701,4 +701,25 @@ if __name__ == "__main__":
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_network_out.pdf".format(outputDirectory))
-    print("{}/p2p_network_out.pdf".format(outputDirectory))
+    print("{}/p2p_network_out.pdf".format(outputDirectory))'''
+
+    # visualize network-out in P2P vs. QuadTree with subplots
+    visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
+    figure.set_size_inches(15, 10)
+    visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"])
+    visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"])
+    visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"])
+    first_y_limits = visualizer.y_limits
+    visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
+    visualizer.plotStackedBarChart(axes[1][0], ["16", "cluster"], ["concentrated"])
+    visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"])
+    visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"])
+    visualizer.y_limits += first_y_limits
+    visualizer.setMaxY(axes, 2, 3)
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
+                  labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.15)
+    plotter.savefig("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
+    print("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
