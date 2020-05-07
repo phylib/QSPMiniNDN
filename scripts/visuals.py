@@ -292,7 +292,9 @@ class Visualizer:
 
         # get maximum y-value
         for i in range(len(means)):
-            self.y_limits.append(numpy.sum([means[i], stds[i]]))
+            for j in range(len(means[i])):
+                for i2 in range(len(means)):
+                    self.y_limits.append(numpy.sum([means[i2][j], stds[i2][j]]))
 
 
     def plotStackedBarChart(self, axis, filterCriteria, barGroups):
@@ -396,9 +398,18 @@ class Visualizer:
         axis.yaxis.grid(True)
 
         # get maximum y-value
+        stacked_y_limits = []
+        # for every protocol
         for i in range(len(means)):
+            #for every data
             for j in range(len(means[i])):
-                self.y_limits.append(numpy.sum(means[i][j]))
+                #for every barGroup
+                for k in range(len(means[i][j])):
+                    for j2 in range(len(means[i])):
+                        stacked_y_limits.append(means[i][j2][k])
+
+                    self.y_limits.append(numpy.sum(stacked_y_limits))
+                    stacked_y_limits.clear()
 
 
     def getBar(self, axis, position, mean, width, bottom, error, errorcolor, capsize, color, edgecolor, hatch=None):
