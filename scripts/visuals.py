@@ -453,11 +453,11 @@ class Visualizer:
         y_limit = numpy.max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
-                axes[index].set_ylim(top=y_limit)
+                axes[index].set_ylim(top=y_limit, bottom=0)
         else:
             for i in range(rows):
                 for j in range(columns):
-                    axes[i][j].set_ylim(top=y_limit)
+                    axes[i][j].set_ylim(top=y_limit, bottom=0)
 
     def prependYAxisLabel(self, axis, prependLabel):
         newLabel = prependLabel + axis.get_ylabel()
@@ -479,7 +479,7 @@ if __name__ == "__main__":
         os.makedirs(outputDirectory)
 
     # visualize packets
-    '''visualizer = Visualizer("packets", csvDirectory)
+    visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
@@ -494,7 +494,7 @@ if __name__ == "__main__":
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
     print("{}/allProtocols_packets.pdf".format(outputDirectory))
 
@@ -511,7 +511,7 @@ if __name__ == "__main__":
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/allProtocols_bytes.pdf".format(outputDirectory))
     print("{}/allProtocols_bytes.pdf".format(outputDirectory))
 
@@ -530,7 +530,7 @@ if __name__ == "__main__":
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/allProtocols_loss.pdf".format(outputDirectory))
     print("{}/allProtocols_loss.pdf".format(outputDirectory))
 
@@ -538,6 +538,7 @@ if __name__ == "__main__":
     visualizer = Visualizer("network", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed", "cluster"], ["in", "out"])
+    axis.set_ylim(bottom=0)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -549,6 +550,7 @@ if __name__ == "__main__":
     visualizer = Visualizer("latencies", csvDirectory)
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "very-distributed"], ["continent", "cluster"])
+    axis.set_ylim(bottom=0)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -567,7 +569,7 @@ if __name__ == "__main__":
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_loss.pdf".format(outputDirectory))
     print("{}/p2p_loss.pdf".format(outputDirectory))
 
@@ -633,7 +635,7 @@ if __name__ == "__main__":
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
     print("{}/allProtocols_network_out.pdf".format(outputDirectory))
 
@@ -642,12 +644,13 @@ if __name__ == "__main__":
     figure, axis = plotter.subplots()
     visualizer.plotSimpleBarChart(axis, ["16", "cluster", 'concentrated'],
                                   ["received_chunk_responses", "received_subtree_responses"])
+    axis.set_ylim(bottom=0)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_responses.pdf".format(outputDirectory))
-    print("{}/p2p_responses.pdf".format(outputDirectory))'''
+    print("{}/p2p_responses.pdf".format(outputDirectory))
 
     # visualize responses in P2P vs. QuadTree with subplots
     visualizer = Visualizer("responses", csvDirectory)
@@ -657,9 +660,9 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"], subplots = True)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
-    figure.suptitle(visualizer.buildLabel(["16", "cluster", "concentrated"]), y = 0.15 )
+    figure.suptitle(visualizer.buildLabel(["16", "cluster", "concentrated"]), y=0.1)
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_responses_subplots.pdf".format(outputDirectory))
     print("{}/p2p_responses_subplots.pdf".format(outputDirectory))
 
@@ -674,6 +677,6 @@ if __name__ == "__main__":
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, frameon=False, fontsize='large')
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_network_out.pdf".format(outputDirectory))
     print("{}/p2p_network_out.pdf".format(outputDirectory))
