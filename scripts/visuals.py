@@ -716,10 +716,10 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"])
     visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"])
     visualizer.y_limits += first_y_limits
-    tmpAxes = [[axes[0, 0], axes[0, 1], axes[0, 2]]]
-    visualizer.setMaxY(tmpAxes, 2, 3)
-    tmpAxes = [[axes[1, ], axes[1, 1], axes[2, 2]]]
     visualizer.setMaxY(axes, 2, 3)
+    axes[0, 0].set_ylim(top=7, bottom=0)
+    axes[0, 1].set_ylim(top=7, bottom=0)
+    axes[0, 2].set_ylim(top=7, bottom=0)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
