@@ -477,7 +477,7 @@ class Visualizer:
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit, bottom=0)
         else:
-            for i in rows:
+            for i in range(rows):
                 for j in range(columns):
                     axes[i][j].set_ylim(top=y_limit, bottom=0)
 
