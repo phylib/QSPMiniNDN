@@ -470,14 +470,15 @@ class Visualizer:
 
         return label
 
-    def setMaxY(self, axes, rows, columns):
+    def setMaxY(self, axes, rows, columns, select_rows=None):
         axes = numpy.array(axes)
         y_limit = max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit, bottom=0)
         else:
-            for i in range(rows):
+            rows = select_rows if select_rows != None else range(rows)
+            for i in rows:
                 for j in range(columns):
                     axes[i][j].set_ylim(top=y_limit, bottom=0)
 
@@ -716,9 +717,12 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"])
     visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"])
     visualizer.y_limits += first_y_limits
-    visualizer.setMaxY(axes, 2, 3)
+    visualizer.setMaxY(axes, 2, 3, select_rows=[0])
+    visualizer.setMaxY(axes, 2, 3, select_rows=[1])
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
+    visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
