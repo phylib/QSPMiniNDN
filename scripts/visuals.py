@@ -470,14 +470,13 @@ class Visualizer:
 
         return label
 
-    def setMaxY(self, axes, rows, columns, select_rows=None):
+    def setMaxY(self, axes, rows, columns):
         axes = numpy.array(axes)
         y_limit = max(self.y_limits) * 1.1
         if(1 in [rows, columns] and rows!=columns):
             for index in range(columns):
                 axes[index].set_ylim(top=y_limit, bottom=0)
         else:
-            rows = select_rows if select_rows != None else range(rows)
             for i in rows:
                 for j in range(columns):
                     axes[i][j].set_ylim(top=y_limit, bottom=0)
@@ -717,8 +716,10 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"])
     visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"])
     visualizer.y_limits += first_y_limits
-    visualizer.setMaxY(axes, 2, 3, select_rows=[0])
-    visualizer.setMaxY(axes, 2, 3, select_rows=[1])
+    tmpAxes = [[axes[0, 0], axes[0, 1], axes[0, 2]]]
+    visualizer.setMaxY(tmpAxes, 2, 3)
+    tmpAxes = [[axes[1, ], axes[1, 1], axes[2, 2]]]
+    visualizer.setMaxY(axes, 2, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
