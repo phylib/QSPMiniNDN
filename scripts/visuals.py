@@ -198,7 +198,7 @@ class Visualizer:
 
 
 
-    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, subplots = False):
+    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, subplots = False, alternativeLabel = None):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -214,10 +214,13 @@ class Visualizer:
         for barGroup in barGroups:
             labels.append(self.labelDictionary[barGroup])
 
-        if(len(barGroups) <= 1 and not(self.data == 'responses' and subplots)):
+        if(alternativeLabel == None):
+            if(len(barGroups) <= 1 and not(self.data == 'responses' and subplots)):
                 xlabel = self.buildLabel(filterCriteria + barGroups)
-        elif(not(self.data == 'responses' and subplots)):
-            xlabel = self.buildLabel(filterCriteria)
+            elif(not(self.data == 'responses' and subplots)):
+                xlabel = self.buildLabel(filterCriteria)
+        else:
+            xlabel = alternativeLabel
 
         # calculate the means + standard deviations per bar group
         # for each protocol ( #(means) = #(standard deviations) = #(barGroups) * #(protocols))
@@ -233,7 +236,11 @@ class Visualizer:
         # as well as the width and color for the bars
         # if only one bar group is plotted, add a space of 0.1 between the bars
         x_pos = numpy.arange(len(barGroups))
-        width = 0.25
+        if(len(self.protocols) < 3):
+            width = 0.075
+        else:
+            width = 0.25
+
         space = 0
         if(len(barGroups) == 1):
             space = 0.1
@@ -246,7 +253,6 @@ class Visualizer:
         for i in range(len(self.protocols)):
             bar = self.getBar(axis, x_pos + i * (width+space), means[i], width, None, stds[i], "black", 10, colors[i], "black")
             bars.append(bar)
-            #legend.append(bar[0])
             legendHandle = bar[0]
             if(not(legendHandle in self.legendHandles)):
                 self.legendHandles.append(legendHandle)
@@ -297,7 +303,7 @@ class Visualizer:
                     self.y_limits.append(numpy.sum([means[i2][j], stds[i2][j]]))
 
 
-    def plotStackedBarChart(self, axis, filterCriteria, barGroups):
+    def plotStackedBarChart(self, axis, filterCriteria, barGroups, alternativeLabel = None):
         """
         for plotting the stacked bar chart do not
         use error bars --> standard deviation is not needed,
@@ -310,10 +316,13 @@ class Visualizer:
         for barGroup in barGroups:
             labels.append(self.labelDictionary[barGroup])
 
-        if (len(barGroups) <= 1):
-            xlabel = self.buildLabel(filterCriteria + barGroups)
+        if(alternativeLabel == None):
+            if (len(barGroups) <= 1):
+                xlabel = self.buildLabel(filterCriteria + barGroups)
+            else:
+                xlabel = self.buildLabel(filterCriteria)
         else:
-            xlabel = self.buildLabel(filterCriteria)
+            xlabel = alternativeLabel
 
         if self.data == "packets":
             columnFilters = {
@@ -340,7 +349,10 @@ class Visualizer:
         # as well as the width and color for the bars
         # if only one bar group is plotted, add a space of 0.1 between the bars
         x_pos = numpy.arange(len(barGroups))
-        width = 0.25
+        if (len(self.protocols) < 3):
+            width = 0.075
+        else:
+            width = 0.25
         space = 0
         if (len(barGroups) == 1):
             space = 0.1
@@ -501,7 +513,7 @@ if __name__ == "__main__":
         os.makedirs(outputDirectory)
 
     # visualize packets
-    '''visualizer = Visualizer("packets", csvDirectory)
+    visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
@@ -701,7 +713,7 @@ if __name__ == "__main__":
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_network_out.pdf".format(outputDirectory))
-    print("{}/p2p_network_out.pdf".format(outputDirectory))'''
+    print("{}/p2p_network_out.pdf".format(outputDirectory))
 
     # visualize network-out in P2P vs. QuadTree with subplots
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
