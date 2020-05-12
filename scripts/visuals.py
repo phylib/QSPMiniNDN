@@ -198,7 +198,8 @@ class Visualizer:
 
 
 
-    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, subplots = False, alternativeLabel = None):
+    def plotSimpleBarChart(self, axis, filterCriteria, barGroups, subplots = False,
+                           alternativeLabel = None, makeSmaller = False):
         """
         calculate the mean + standard deviation per protocol for each bar group
         that should be plotted;
@@ -236,8 +237,9 @@ class Visualizer:
         # as well as the width and color for the bars
         # if only one bar group is plotted, add a space of 0.1 between the bars
         x_pos = numpy.arange(len(barGroups))
-        if(len(self.protocols) < 3):
+        if(makeSmaller):
             width = 0.075
+            axis.margins(0.3, None)
         else:
             width = 0.25
 
@@ -303,7 +305,8 @@ class Visualizer:
                     self.y_limits.append(numpy.sum([means[i2][j], stds[i2][j]]))
 
 
-    def plotStackedBarChart(self, axis, filterCriteria, barGroups, alternativeLabel = None):
+    def plotStackedBarChart(self, axis, filterCriteria, barGroups,
+                            alternativeLabel = None, makeSmaller = False):
         """
         for plotting the stacked bar chart do not
         use error bars --> standard deviation is not needed,
@@ -349,8 +352,9 @@ class Visualizer:
         # as well as the width and color for the bars
         # if only one bar group is plotted, add a space of 0.1 between the bars
         x_pos = numpy.arange(len(barGroups))
-        if (len(self.protocols) < 3):
+        if (makeSmaller):
             width = 0.075
+            axis.margins(0.3, None)
         else:
             width = 0.25
         space = 0
@@ -360,8 +364,6 @@ class Visualizer:
 
         # define the bars for each protocol we want to represent in the different bar groups
         bars = []
-        #legend = []
-        #legendlabels = []
         i = 0
         for protocol in self.protocols:
             for j in range(len(columnFilters[protocol])):
@@ -372,7 +374,6 @@ class Visualizer:
                     bar = self.getBar(axis, x_pos + i * (width + space), means[i][j], width, 0, None,
                                       None, 10, colors[i], "black", )
                 bars.append(bar)
-                #legend.append(bar[0])
                 legendHandle = bar[0]
                 legendLable = "%s %s" % (self.labelDictionary[protocol],
                                          self.labelDictionary[columnFilters[protocol][j][1]])
@@ -403,7 +404,6 @@ class Visualizer:
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
         axis.set_xlabel("Setting: " + xlabel)
-        #axis.legend(legend, legendlabels)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
@@ -596,9 +596,9 @@ if __name__ == "__main__":
     visualizer = Visualizer("summary", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=1, ncols=3)
     figure.set_size_inches(15,7)
-    visualizer.plotSimpleBarChart(axes[0], ["16", "concentrated"], ["cluster"])
-    visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"])
-    visualizer.plotSimpleBarChart(axes[2], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotSimpleBarChart(axes[0], ["16", "concentrated"], ["cluster"], makeSmaller=True)
+    visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
+    visualizer.plotSimpleBarChart(axes[2], ["16", "very-distributed"], ["cluster"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
@@ -626,9 +626,9 @@ if __name__ == "__main__":
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=1, ncols=3)
     figure.set_size_inches(15,7)
-    visualizer.plotStackedBarChart(axes[0], ["16", "concentrated"], ["cluster"])
-    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
-    visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[0], ["16", "concentrated"], ["cluster"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"],makeSmaller=True)
     visualizer.setMaxY(axes,1,3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
@@ -641,9 +641,9 @@ if __name__ == "__main__":
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=1, ncols=3)
     figure.set_size_inches(15,7)
-    visualizer.plotStackedBarChart(axes[0], ["16", "concentrated"], ["cluster"])
-    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"])
-    visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"])
+    visualizer.plotStackedBarChart(axes[0], ["16", "concentrated"], ["cluster"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
@@ -690,8 +690,8 @@ if __name__ == "__main__":
     visualizer = Visualizer("responses", csvDirectory)
     figure, axes = plotter.subplots(nrows=1, ncols=2)
     figure.set_size_inches(10, 7)
-    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"], subplots = True)
-    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"], subplots = True)
+    visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"], subplots = True, makeSmaller=True)
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"], subplots = True, makeSmaller=True)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.suptitle(visualizer.buildLabel(["16", "cluster", "concentrated"]), y=0.1)
@@ -704,9 +704,9 @@ if __name__ == "__main__":
     visualizer = Visualizer("network-out", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=1, ncols=3)
     figure.set_size_inches(15, 7)
-    visualizer.plotSimpleBarChart(axes[0], ["16","cluster"], ["concentrated"])
-    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["distributed"])
-    visualizer.plotSimpleBarChart(axes[2], ["16", "cluster"], ["very-distributed"])
+    visualizer.plotSimpleBarChart(axes[0], ["16","cluster"], ["concentrated"], makeSmaller=True)
+    visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["distributed"], makeSmaller=True)
+    visualizer.plotSimpleBarChart(axes[2], ["16", "cluster"], ["very-distributed"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
@@ -719,14 +719,14 @@ if __name__ == "__main__":
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
-    visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"])
-    visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"])
-    visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"])
+    visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"], makeSmaller=True)
     first_y_limits = visualizer.y_limits
     visualizer = Visualizer("packets", csvDirectory, compareP2P=True)
-    visualizer.plotStackedBarChart(axes[1][0], ["16", "cluster"], ["concentrated"])
-    visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"])
-    visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"])
+    visualizer.plotStackedBarChart(axes[1][0], ["16", "cluster"], ["concentrated"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[1][1], ["16", "cluster"], ["distributed"], makeSmaller=True)
+    visualizer.plotStackedBarChart(axes[1][2], ["16", "cluster"], ["very-distributed"], makeSmaller=True)
     visualizer.y_limits += first_y_limits
     visualizer.setMaxY(axes, 2, 3)
     axes[0, 0].set_ylim(top=7, bottom=0)
