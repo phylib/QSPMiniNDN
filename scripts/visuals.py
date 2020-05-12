@@ -382,7 +382,7 @@ class Visualizer:
         if self.data == "packets":
             ylabel = "Number of packets"
         else:
-            ylabel = "Number of bytes"
+            ylabel = "Amount of bytes"
 
         if (self.transformationFactor == 1000):
             ylabel += (" [k]")
