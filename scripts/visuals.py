@@ -749,7 +749,7 @@ if __name__ == "__main__":
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 10)
+    figure.set_size_inches(20, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
     visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
     visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
