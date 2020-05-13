@@ -497,6 +497,17 @@ class Visualizer:
         newLabel = prependLabel + axis.get_ylabel()
         axis.set_ylabel(newLabel)
 
+    def setLabelPerRow(self, axes, rows, columns):
+        if (1 in [rows, columns] and rows != columns):
+            for index in range(columns):
+                if(columns > 1 and index > 0):
+                    axes[index].set_ylabel("")
+        else:
+            for i in range(rows):
+                for j in range(columns):
+                    if (j > 0):
+                        axes[i][j].set_ylabel("")
+
 
 if __name__ == "__main__":
 
@@ -525,6 +536,7 @@ if __name__ == "__main__":
     visualizer.setMaxY(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
+    visualizer.setLabelPerRow(axes, 2, 3)
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -542,6 +554,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1, 0], ["4", "very-distributed"], ["cluster", "continent"])
     visualizer.plotStackedBarChart(axes[1, 1], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 2)
+    visualizer.setLabelPerRow(axes, 2, 2)
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -561,6 +574,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1, 1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1, 2], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
+    visualizer.setLabelPerRow(axes, 2, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -600,6 +614,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
     visualizer.plotSimpleBarChart(axes[2], ["16", "very-distributed"], ["cluster"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
+    visualizer.setLabelPerRow(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -614,7 +629,8 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[0], ["16", "concentrated", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[1], ["16", "distributed", "cluster"], ["in", "out"])
     visualizer.plotSimpleBarChart(axes[2], ["16", "very-distributed", "cluster"], ["in", "out"])
-    visualizer.setMaxY(axes, 1,3)
+    visualizer.setMaxY(axes, 1, 3)
+    visualizer.setLabelPerRow(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -629,7 +645,8 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[0], ["16", "concentrated"], ["cluster"], makeSmaller=True)
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
     visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"],makeSmaller=True)
-    visualizer.setMaxY(axes,1,3)
+    visualizer.setMaxY(axes, 1, 3)
+    visualizer.setLabelPerRow(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -645,6 +662,7 @@ if __name__ == "__main__":
     visualizer.plotStackedBarChart(axes[1], ["16", "distributed"], ["cluster"], makeSmaller=True)
     visualizer.plotStackedBarChart(axes[2], ["16", "very-distributed"], ["cluster"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
+    visualizer.setLabelPerRow(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -664,6 +682,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
     visualizer.setMaxY(axes, 2, 3)
+    visualizer.setLabelPerRow(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
@@ -692,6 +711,7 @@ if __name__ == "__main__":
     figure.set_size_inches(10, 7)
     visualizer.plotSimpleBarChart(axes[0], ["16", "cluster", "concentrated"], ["received_chunk_responses"], subplots = True, makeSmaller=True)
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster", "concentrated"], ["received_subtree_responses"], subplots = True, makeSmaller=True)
+    visualizer.setLabelPerRow(axes, 1, 2)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=len(visualizer.legendLabels),
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.suptitle(visualizer.buildLabel(["16", "cluster", "concentrated"]), y=0.1)
@@ -708,6 +728,7 @@ if __name__ == "__main__":
     visualizer.plotSimpleBarChart(axes[1], ["16", "cluster"], ["distributed"], makeSmaller=True)
     visualizer.plotSimpleBarChart(axes[2], ["16", "cluster"], ["very-distributed"], makeSmaller=True)
     visualizer.setMaxY(axes, 1, 3)
+    visualizer.setLabelPerRow(axes, 1, 3)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout()
@@ -736,6 +757,7 @@ if __name__ == "__main__":
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
+    visualizer.setLabelPerRow(axes, 2, 3)
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
