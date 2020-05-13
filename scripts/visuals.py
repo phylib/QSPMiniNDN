@@ -398,9 +398,9 @@ class Visualizer:
 
         # set the labels according to the data we analyzed
         if self.data == "packets":
-            ylabel = "Number of packets"
+            ylabel = "Number of Sent Packets"
         else:
-            ylabel = "Amount of bytes"
+            ylabel = "Amount of Sent Bytes"
 
         if (self.transformationFactor == 1000):
             ylabel += (" [k]")
@@ -716,8 +716,8 @@ if __name__ == "__main__":
     axes[0, 2].set_ylim(top=7, bottom=0)
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=2,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
-    visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
-    visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
+    #visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
+    #visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
     visualizer.setLabelPerRow(axes, 2, 3)
     figure.tight_layout(pad=3.0)
     figure.subplots_adjust(bottom=0.2)
@@ -728,12 +728,12 @@ if __name__ == "__main__":
     visualizer = Visualizer("network-out", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(20, 10)
-    visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][0], ["16", "concentrated"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
+    visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
+    visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
+    visualizer.plotSimpleBarChart(axes[1][0], ["16", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
+    visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
+    visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
     visualizer.setMaxY(axes, 2, 3)
     visualizer.setLabelPerRow(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
@@ -750,12 +750,12 @@ if __name__ == "__main__":
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(15, 10)
-    visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
+    visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
+    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
+    visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
+    visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
+    visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
     visualizer.setMaxY(axes, 2, 3)
     visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
