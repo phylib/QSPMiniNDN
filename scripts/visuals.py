@@ -42,21 +42,21 @@ class Visualizer:
         self.labelDictionary = {
             'QuadTree': 'QSP',
             'StateVector': 'SVS',
-            'ZMQ': 'ZMQ Pub/Sub',
-            'P2P': 'Peer-to-Peer',
+            'ZMQ': 'ZMQ Pub-/Sub',
+            'P2P': 'QSP (region-based)',
             'cluster': 'Data Center',
-            'continent': 'GEANT-Topology',
+            'continent': 'GEANT Topology',
             'concentrated': 'concentrated scenario',
             'distributed': 'widespread scenario',
-            'very-distributed': 'max distance scenario',
+            'very-distributed': 'max-distance scenario',
             'in': 'ingoing',
             'out': 'outgoing',
-            '#interests': 'number of interest packets',
-            'bytesInterests': 'bytes of interest packets',
-            '#data': 'number of data packets',
-            'bytesData': 'bytes of data packets',
-            '#IPSyncPackets': 'number of IP-Sync packets',
-            'bytesIPSyncPackets': 'bytes of IP-Sync packets',
+            '#interests': '(Interests)',
+            'bytesInterests': '(Interests)',
+            '#data': '(Data)',
+            'bytesData': '(Data)',
+            '#IPSyncPackets': '',
+            'bytesIPSyncPackets': '',
             'received_chunk_responses' : 'Received Chunk Responses',
             'received_subtree_responses': 'Received Subtree Responses'
         }
@@ -277,7 +277,7 @@ class Visualizer:
         elif(self.data == "network"):
             ylabel = "Bytes of Sync Payload"
         elif (self.data == "network-out"):
-            ylabel = "Bytes of outgoing Sync Payload"
+            ylabel = "Outgoing Sync Payload"
         elif(self.data == "responses"):
             ylabel = "Received Responses"
         else:
@@ -403,7 +403,7 @@ class Visualizer:
             ylabel += (" [MB]")
         axis.set_ylabel(ylabel)
         axis.ticklabel_format(style='plain', axis='y', scilimits=(0, 0))
-        axis.set_xlabel("Setting: " + xlabel)
+        axis.set_xlabel(xlabel)
 
         # show a grid along the y-axis and put it behind the bars
         axis.set_axisbelow(True)
