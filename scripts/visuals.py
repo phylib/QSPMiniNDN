@@ -43,7 +43,7 @@ class Visualizer:
             'QuadTree': 'QSP',
             'StateVector': 'SVS',
             'ZMQ': 'ZMQ Pub-/Sub',
-            'P2P': 'QSP (region-based)',
+            'P2P': 'Region-based QSP',
             'cluster': 'Data Center',
             'continent': 'GEANT Topology',
             'concentrated': 'concentrated scenario',
