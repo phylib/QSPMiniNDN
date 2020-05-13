@@ -719,7 +719,7 @@ if __name__ == "__main__":
     visualizer.prependYAxisLabel(axes[0, 0], "Amount of Sent Bytes\n\n")
     visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
     visualizer.setLabelPerRow(axes, 2, 3)
-    figure.tight_layout()
+    figure.tight_layout(pad=3.0)
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
     print("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
@@ -727,7 +727,7 @@ if __name__ == "__main__":
     # visualize outgoing network traffic
     visualizer = Visualizer("network-out", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 7)
+    figure.set_size_inches(20, 10)
     visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
     visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"])
@@ -740,7 +740,7 @@ if __name__ == "__main__":
     visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
     figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
-    figure.tight_layout()
+    figure.tight_layout(pad=3.0)
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
     print("{}/allProtocols_network_out.pdf".format(outputDirectory))
@@ -762,7 +762,7 @@ if __name__ == "__main__":
     visualizer.setLabelPerRow(axes, 2, 3)
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
-    figure.tight_layout()
+    figure.tight_layout(pad=3.0)
     figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
     print("{}/allProtocols_packets.pdf".format(outputDirectory))
