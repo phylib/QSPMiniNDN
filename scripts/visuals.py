@@ -3,8 +3,13 @@ import pandas
 import argparse
 import scipy.stats
 import os
+import matplotlib
 import matplotlib.pyplot as plotter
 from scripts.filefetcher import FileFetcher
+
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+matplotlib.rcParams.update({'font.size': 15})
 
 class Visualizer:
 
@@ -523,30 +528,8 @@ if __name__ == "__main__":
     if not os.path.isdir(outputDirectory):
         os.makedirs(outputDirectory)
 
-    # visualize packets
-    visualizer = Visualizer("packets", csvDirectory)
-    figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 10)
-    visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
-    visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
-    visualizer.setMaxY(axes, 2, 3)
-    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
-    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
-    visualizer.setLabelPerRow(axes, 2, 3)
-    legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
-                  labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
-    figure.tight_layout()
-    figure.subplots_adjust(bottom=0.15)
-    plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
-    print("{}/allProtocols_packets.pdf".format(outputDirectory))
-
-
     #visualize bytes
-    visualizer = Visualizer("bytes", csvDirectory)
+    '''visualizer = Visualizer("bytes", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=2)
     figure.set_size_inches(15, 10)
     visualizer.plotStackedBarChart(axes[0, 0], ["16", "very-distributed"], ["cluster", "continent"])
@@ -670,28 +653,6 @@ if __name__ == "__main__":
     plotter.savefig("{}/p2p_bytes.pdf".format(outputDirectory))
     print("{}/p2p_bytes.pdf".format(outputDirectory))
 
-
-    # visualize outgoing network traffic
-    visualizer = Visualizer("network-out", csvDirectory)
-    figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 7)
-    visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][0], ["16", "concentrated"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
-    visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
-    visualizer.setMaxY(axes, 2, 3)
-    visualizer.setLabelPerRow(axes, 2, 3)
-    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
-    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
-    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
-                  labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
-    figure.tight_layout()
-    figure.subplots_adjust(bottom=0.15)
-    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
-    print("{}/allProtocols_network_out.pdf".format(outputDirectory))
-
     # visualize responses in P2P vs. QuadTree in one plot
     visualizer = Visualizer("responses", csvDirectory)
     figure, axis = plotter.subplots()
@@ -734,7 +695,7 @@ if __name__ == "__main__":
     figure.tight_layout()
     figure.subplots_adjust(bottom=0.15)
     plotter.savefig("{}/p2p_network_out.pdf".format(outputDirectory))
-    print("{}/p2p_network_out.pdf".format(outputDirectory))
+    print("{}/p2p_network_out.pdf".format(outputDirectory))'''
 
     # visualize network-out in P2P vs. QuadTree with subplots
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
@@ -759,6 +720,49 @@ if __name__ == "__main__":
     visualizer.prependYAxisLabel(axes[1, 0], "Number of Sent Packets\n\n")
     visualizer.setLabelPerRow(axes, 2, 3)
     figure.tight_layout()
-    figure.subplots_adjust(bottom=0.15)
+    figure.subplots_adjust(bottom=0.2)
     plotter.savefig("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
     print("{}/p2p_bytes_vs_packets.pdf".format(outputDirectory))
+
+    # visualize outgoing network traffic
+    visualizer = Visualizer("network-out", csvDirectory)
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
+    figure.set_size_inches(15, 7)
+    visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][0], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][1], ["16", "distributed"], ["cluster", "continent"])
+    visualizer.plotSimpleBarChart(axes[1][2], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 3)
+    visualizer.setLabelPerRow(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
+    figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
+                  labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
+    plotter.savefig("{}/allProtocols_network_out.pdf".format(outputDirectory))
+    print("{}/allProtocols_network_out.pdf".format(outputDirectory))
+
+
+    # visualize packets
+    visualizer = Visualizer("packets", csvDirectory)
+    figure, axes = plotter.subplots(nrows=2, ncols=3)
+    figure.set_size_inches(15, 10)
+    visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 0], ["16", "concentrated"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 1], ["16", "distributed"], ["cluster", "continent"])
+    visualizer.plotStackedBarChart(axes[1, 2], ["16", "very-distributed"], ["cluster", "continent"])
+    visualizer.setMaxY(axes, 2, 3)
+    visualizer.prependYAxisLabel(axes[0, 0], "4 Servers\n\n")
+    visualizer.prependYAxisLabel(axes[1, 0], "16 Servers\n\n")
+    visualizer.setLabelPerRow(axes, 2, 3)
+    legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
+                  labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
+    figure.tight_layout()
+    figure.subplots_adjust(bottom=0.2)
+    plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
+    print("{}/allProtocols_packets.pdf".format(outputDirectory))
