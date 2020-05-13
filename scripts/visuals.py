@@ -700,7 +700,7 @@ if __name__ == "__main__":
     # visualize network-out in P2P vs. QuadTree with subplots
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 10)
+    figure.set_size_inches(20, 10)
     visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"], makeSmaller=True, alternativeLabel="concentrated scenario")
     visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"], makeSmaller=True, alternativeLabel="widespread scenario")
     visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"], makeSmaller=True, alternativeLabel="max-distance scenario")
