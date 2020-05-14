@@ -9,7 +9,7 @@ from scripts.filefetcher import FileFetcher
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
-matplotlib.rcParams.update({'font.size': 15})
+matplotlib.rcParams.update({'font.size': 22})
 
 class Visualizer:
 
@@ -282,7 +282,7 @@ class Visualizer:
         elif(self.data == "network"):
             ylabel = "Bytes of Sync Payload"
         elif (self.data == "network-out"):
-            ylabel = "Outgoing Sync Payload"
+            ylabel = "Outgoing Payload"
         elif(self.data == "responses"):
             ylabel = "Received Responses"
         else:
@@ -398,9 +398,9 @@ class Visualizer:
 
         # set the labels according to the data we analyzed
         if self.data == "packets":
-            ylabel = "Number of Sent Packets"
+            ylabel = "Number of Packets"
         else:
-            ylabel = "Amount of Sent Bytes"
+            ylabel = "Traffic Volume"
 
         if (self.transformationFactor == 1000):
             ylabel += (" [k]")
@@ -700,7 +700,7 @@ if __name__ == "__main__":
     # visualize network-out in P2P vs. QuadTree with subplots
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(15, 10)
+    figure.set_size_inches(22, 12)
     visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"], makeSmaller=True, alternativeLabel="concentrated scenario")
     visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"], makeSmaller=True, alternativeLabel="widespread scenario")
     visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"], makeSmaller=True, alternativeLabel="max-distance scenario")
@@ -727,7 +727,7 @@ if __name__ == "__main__":
     # visualize outgoing network traffic
     visualizer = Visualizer("network-out", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(20, 10)
+    figure.set_size_inches(22, 12)
     visualizer.plotSimpleBarChart(axes[0][0], ["4", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
     visualizer.plotSimpleBarChart(axes[0][1], ["4", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
     visualizer.plotSimpleBarChart(axes[0][2], ["4", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
@@ -749,7 +749,7 @@ if __name__ == "__main__":
     # visualize packets
     visualizer = Visualizer("packets", csvDirectory)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
-    figure.set_size_inches(20, 10)
+    figure.set_size_inches(22, 12)
     visualizer.plotStackedBarChart(axes[0, 0], ["4", "concentrated"], ["cluster", "continent"], alternativeLabel="concentrated scenario")
     visualizer.plotStackedBarChart(axes[0, 1], ["4", "distributed"], ["cluster", "continent"], alternativeLabel="widespread scenario")
     visualizer.plotStackedBarChart(axes[0, 2], ["4", "very-distributed"], ["cluster", "continent"], alternativeLabel="max-distance scenario")
@@ -763,6 +763,6 @@ if __name__ == "__main__":
     legend = figure.legend(bbox_to_anchor=(0.5, 0), loc='lower center', ncol=3,
                   labels=visualizer.legendLabels, handles=visualizer.legendHandles, frameon=False, fontsize='large')
     figure.tight_layout(pad=3.0)
-    figure.subplots_adjust(bottom=0.2)
+    figure.subplots_adjust(bottom=0.25)
     plotter.savefig("{}/allProtocols_packets.pdf".format(outputDirectory))
     print("{}/allProtocols_packets.pdf".format(outputDirectory))
