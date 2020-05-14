@@ -701,6 +701,7 @@ if __name__ == "__main__":
     visualizer = Visualizer("bytes", csvDirectory, compareP2P=True)
     figure, axes = plotter.subplots(nrows=2, ncols=3)
     figure.set_size_inches(22, 12)
+
     visualizer.plotStackedBarChart(axes[0][0], ["16", "cluster"], ["concentrated"], makeSmaller=True, alternativeLabel="concentrated scenario")
     visualizer.plotStackedBarChart(axes[0][1], ["16", "cluster"], ["distributed"], makeSmaller=True, alternativeLabel="widespread scenario")
     visualizer.plotStackedBarChart(axes[0][2], ["16", "cluster"], ["very-distributed"], makeSmaller=True, alternativeLabel="max-distance scenario")
