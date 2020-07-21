@@ -40,6 +40,7 @@ from minindn.helpers.ndn_routing_helper import NdnRoutingHelper
 from minindn.helpers.ip_routing_helper import IPRoutingHelper
 from minindn.helpers.nfdc import Nfdc
 from minindn.apps.QuadTreeGameServer import QuadTreeGameServer
+from minindn.apps.P2PGameServer import P2PGameServer
 from minindn.apps.SVSGameServer import SVSGameServer
 from minindn.apps.ZMQGameServer import ZMQGameServer
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
 
     ####### Define evaluation specific parameters #######
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-servers', dest='numServers', type=int, default=4, choices=[4, 16])
+    parser.add_argument('--num-servers', dest='numServers', type=int, default=4, choices=[4, 16, 64])
     parser.add_argument('--log-dir', dest='logDir', default="log/")
     parser.add_argument('--tree-size', dest='treeSize', default=65536)
     parser.add_argument('--prefix', dest='prefix', default="/world")
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     parser.add_argument('--level-difference', dest='levelDifference', default=2)
     parser.add_argument('--console', dest='console', default=False, type=bool)
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
-    parser.add_argument('--protocol', dest='protocol', default="QuadTree", choices=["QuadTree", "StateVector", "ZMQ"])
+    parser.add_argument('--protocol', dest='protocol', default="QuadTree",
+                        choices=["QuadTree", "StateVector", "ZMQ", "P2P"])
     parser.add_argument('--trace-file', dest='traceFile',
                         default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
     parser.add_argument('--src-dir', dest='srcDir', default="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/")
@@ -101,6 +103,7 @@ if __name__ == '__main__':
     if is_ndn_eval:  # NFD is only required in NDN evaluations
         info('Starting NFD on nodes\n')
         nfds = AppManager(ndn, ndn.net.hosts, Nfd)
+    time.sleep(5)  # Wait until all NFDs are started
 
     ####### Here, the real magic is starting #######
 
@@ -144,8 +147,13 @@ if __name__ == '__main__':
                 grh.addOrigin([server[0]], [server[5]])
             elif protocol == 'StateVector':
                 # Register requrired prefixes
-                grh.addOrigin([server[0]], "/ndn/svs/syncNotify")
-                grh.addOrigin([server[0]], "/ndn/svs/vsyncData")
+                grh.addOrigin([server[0]], ["/ndn/svs/syncNotify"])
+                grh.addOrigin([server[0]], ["/ndn/svs/vsyncData"])
+            elif protocol == 'P2P':
+                nameComponents = server[5].split("/")
+                names = ['/'.join(nameComponents[:i]) for i in range(3, len(nameComponents) + 1)]
+                grh.addOrigin([server[0]], names)
+
         grh.calculateNPossibleRoutes(nFaces=1)
 
         if protocol == 'StateVector':
@@ -167,17 +175,22 @@ if __name__ == '__main__':
                        requestLevel=requestLevel,
                        treeSize=treeSize,
                        chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
-                       traceFile=traceFile, srcDir=srcDir)
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "StateVector":
             AppManager(ndn, [server[0]], SVSGameServer, responsibility=server[6], logFolder=logDir,
                        treeSize=treeSize, clientId=server[7],
-                       traceFile=traceFile, srcDir=srcDir)
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "ZMQ":
             otherPeers = [(remote[0].intfs[0].ip, 5000 + remote[7]) for remote in servers if
-                          remote[0].name != server[0].name]
+                          remote[7] != server[7]]
             AppManager(ndn, [server[0]], ZMQGameServer, responsibility=server[6], logFolder=logDir,
                        serverPort=(5000 + server[7]), otherPeers=otherPeers, clientId=server[7], traceFile=traceFile,
                        srcDir=srcDir + "/ZMQSyncPeer")
+        elif protocol == "P2P":
+            AppManager(ndn, [server[0]], P2PGameServer, responsibility=server[6], logFolder=logDir,
+                       treeSize=treeSize, chunkThreshold=ndn.args.chunkThreshold,
+                       levelDifference=ndn.args.levelDifference,
+                       traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
 
     ################### Do the evaluation ###################
     # Sleep until the end of the evaluation + a bit more

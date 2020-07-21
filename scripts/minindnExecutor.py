@@ -2,10 +2,12 @@ import os
 import argparse
 
 
-def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
+def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/", workDir="/tmp/minindn/",
+            calcPcap=False):
     num_servers = [
-        4,
-        16
+        # 4,
+        16,
+        # 64
     ]
     runs = [
         0,
@@ -16,9 +18,10 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
         5
     ]
     protocols = [
-        "QuadTree",
+        # "QuadTree",
         # "StateVector",
-        # "ZMQ"
+        # "ZMQ",
+        "P2P"
     ]
 
     types = [
@@ -46,7 +49,8 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
 
                         # Check if the results_folder already exists and do not do evaluation in this case
                         if os.path.isdir(results_folder):
-                            print("### Skipping evaluation run, result folder {} already exists ###".format(results_folder))
+                            print("### Skipping evaluation run, result folder {} already exists ###".format(
+                                results_folder))
                             continue
 
                         topology = "topologies/geant.conf"
@@ -56,7 +60,7 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                             serverClusterConfig = "--server-cluster True "
 
                         cmd = "sudo python examples/serversync_experiment.py {} --num-servers={} --protocol={} {} " \
-                              "--result-dir {} --random-seed {} --trace-file {}/traceFiles/{} --src-dir {}".format(
+                              "--result-dir {} --random-seed {} --trace-file {}/traceFiles/{} --src-dir {} --work-dir {}".format(
                             topology,
                             servers,
                             protocol,
@@ -65,13 +69,14 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                             run,
                             os.getcwd(),
                             traceFile,
-                            srcDir
+                            srcDir,
+                            workDir
                         )
                         print(cmd)
                         os.system(cmd)
 
                         # do cleanup
-                        cmd = "sudo rm -rf /tmp/minindn"
+                        cmd = "sudo rm -rf {}".format(workDir)
                         print(cmd)
                         os.system(cmd)
 
@@ -88,6 +93,8 @@ def execute(result_dir="/vagrant/results/", srcDir="./QuadTreeSyncEvaluation/"):
                         print("")
 
     os.system("sudo chown -R ubuntu:ubuntu " + result_dir)
+    if calcPcap:
+        os.system("python3 scripts/parsePcap.py --result-dir {}".format(results_folder))
     # os.system(
     #     "source ~/analysis/bin/activate && python3 ~/mc/mc-server-sync/statistics/trafficAnalysis/parsePCAP.py -i " + result_dir + " -o " + result_dir)
 
@@ -96,11 +103,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Execute multiple MiniNDN Evaluations.')
     parser.add_argument('--result-dir', dest='resultDir', default="/tmp/")
     parser.add_argument('--src-dir', dest='srcDir', default=None)
+    parser.add_argument('--work-dir', dest='workDir', default="/tmp/minindn/")
+    parser.add_argument('--calc-pcap', action='store_true',
+                        help="Recalculate all pcap stats after the evaluation finished")
 
     args = parser.parse_args()
     resultDir = args.resultDir
     srcDir = args.srcDir
+    workDir = args.workDir
+    calcPcap = args.calc_pcap
     if srcDir is None:
         srcDir = os.getcwd() + "/QuadTreeSyncEvaluation/"
 
-    execute(result_dir=resultDir, srcDir=srcDir)
+    execute(result_dir=resultDir, srcDir=srcDir, workDir=workDir, calcPcap=calcPcap)
