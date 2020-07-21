@@ -1,3 +1,19 @@
+# Mini-NDN QSP Evaluation
+
+This repository contains software artifacts for the the paper: _Philipp Moll, Selina Isak, Hermann Hellwagner, Jeff Burke. A Quadtree-based Synchronization Protocol for Inter-Server Game State Synchronization. Submitted to Computer Networks, Elsevier._
+
+This repository is a fork of the [MiniNDN repository](https://github.com/named-data/mini-ndn). The original README 
+content can be found below. 
+
+The script to perform the evaluation can bei found in `examples/serversync_experiment.py`. To start, execute 
+`sudo python3 examples/serversync_experiment.py -h`. The used topologies were the `4-server-topo`, the `16-server-topo`
+and the `geant` topology. Please specify the parameters `--server-cluster` and `--num-servers` accordingly.
+
+The trace files used in the paper's evalulations can be found in the `traceFiles` folder. However, other trace files
+can be generated as explained in the [reproducibility repository of the paper](https://github.com/phylib/QSPArtifacts).
+
+To install MiniNDN and all Dependencies, please use `sudo ./install.sh -a`
+
 Mini-NDN
 ========
 
