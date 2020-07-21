@@ -4,6 +4,13 @@ dist
 Mini_NDN.egg-info
 *.pyc
 
+# Added by Selina
+venv
+result-csv-files_3runs
+result-csv-files_6runs
+plot-results
+2020-04-08_stats-files
+
 # Docs
 docs/html
 docs/latex
