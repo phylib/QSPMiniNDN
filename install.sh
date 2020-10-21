@@ -89,8 +89,8 @@ NDN_SRC="ndn-src"
 
 NDN_GITHUB="https://github.com/named-data"
 
-NDN_CXX_VERSION="master"
-NFD_VERSION="master"
+NDN_CXX_VERSION="ndn-cxx-0.6.1"
+NFD_VERSION="NFD-0.6.1"
 PSYNC_VERSION="master"
 CHRONOSYNC_VERSION="master"
 NLSR_VERSION="master"
@@ -346,12 +346,15 @@ function usage {
 }
 
 function quadTreeSync {
+  $install cmake
+
   # Install Catch2
   mkdir -p dependencies
   pushd dependencies
 
   git clone https://github.com/catchorg/Catch2.git
   pushd Catch2
+  git checkout v2.9.2
   cmake -Bbuild -H. -DBUILD_TESTING=OFF
   sudo cmake --build build/ --target install
   popd
@@ -368,8 +371,6 @@ function quadTreeSync {
   popd
 
   sudo ldconfig
-
-  $install cmake
 
   popd
 
