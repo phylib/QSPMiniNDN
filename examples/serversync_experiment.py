@@ -72,6 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--server-cluster', dest='serverCluster', default=False, type=bool)
     parser.add_argument('--protocol', dest='protocol', default="QuadTree",
                         choices=["QuadTree", "StateVector", "ZMQ", "P2P"])
+    parser.add_argument('--qsp-request-interval', dest='qspRequestInterval', type=int, default=500)
     parser.add_argument('--trace-file', dest='traceFile',
                         default="/home/phmoll/Coding/SyncProtocols/mini-ndn/traceFiles/ChunkChanges-very-distributed.csv")
     parser.add_argument('--src-dir', dest='srcDir', default="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/")
@@ -90,6 +91,7 @@ if __name__ == '__main__':
     protocol = ndn.args.protocol
     traceFile = ndn.args.traceFile
     srcDir = ndn.args.srcDir
+    qspRequestInterval = ndn.args.qspRequestInterval
 
     dump_params(ndn.args)
 
@@ -175,6 +177,7 @@ if __name__ == '__main__':
                        requestLevel=requestLevel,
                        treeSize=treeSize,
                        chunkThreshold=ndn.args.chunkThreshold, levelDifference=ndn.args.levelDifference,
+                       requestInterval=qspRequestInterval,
                        traceFile=traceFile, srcDir=srcDir + "/QuadTreeSyncEvaluation")
         elif protocol == "StateVector":
             AppManager(ndn, [server[0]], SVSGameServer, responsibility=server[6], logFolder=logDir,
@@ -198,7 +201,7 @@ if __name__ == '__main__':
     if ndn.args.console:
         MiniNDNCLI(ndn.net)
     else:
-        for i in tqdm(range(0, 66), desc="Evaluation Progress"):
+        for i in tqdm(range(0, 36), desc="Evaluation Progress"):
             time.sleep(10)
 
     ndn.stop()

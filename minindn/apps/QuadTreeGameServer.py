@@ -6,6 +6,7 @@ class QuadTreeGameServer(Application):
 
     def __init__(self, node, responsibility, logLevel='NONE', logFolder="./logs/", treeSize=65536,
                  traceFile="trace.csv", requestLevel=1, prefix="/world", chunkThreshold=200, levelDifference=2,
+                 requestInterval=500,
                  srcDir="/home/phmoll/Coding/SyncProtocols/QuadTreeSyncEvaluation/"):
         Application.__init__(self, node)
 
@@ -18,6 +19,7 @@ class QuadTreeGameServer(Application):
         self.chunkThreshold = chunkThreshold
         self.levelDifference = levelDifference
         self.srcDir = srcDir
+        self.requestInterval = requestInterval
 
         self.responsibility = responsibility
 
@@ -36,6 +38,7 @@ class QuadTreeGameServer(Application):
                       " --prefix {5}"
                       " --chunkThreshold {6}"
                       " --levelDifference {7}"
+                      " --syncRequestInterval {9}"
                       " &> {1}/gameserver_{0}.out &".format(self.responsibility, self.logFolder, self.treeSize,
                                                             self.traceFile, self.requestLevel, self.prefix,
-                                                            self.chunkThreshold, self.levelDifference, self.srcDir))
+                                                            self.chunkThreshold, self.levelDifference, self.srcDir, self.requestInterval))
